@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user['role'] == 'admin') {
                 header('Location: admin/admin_dashboard.php');
             } else {
-                header('Location: user/user_dashboard.php');
+                header('Location: index.php');
             }
             exit;
         } else {
@@ -42,8 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-require 'components/header.php';
 ?>
 
 <!DOCTYPE html>
@@ -52,14 +50,26 @@ require 'components/header.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
     <title>Login</title>
+    <style>
+    body {
+        background-image: url('assets/image/background.jpg');
+        object-fit: cover;
+        background-position: center;
+        height: auto;
+    }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
 </head>
 
 <body>
     <section>
-        <div class="bg-gray-100 h-screen flex items-center justify-center">
-            <div class="bg-white p-8 rounded shadow-md max-w-md w-full">
-                <h2 class="text-2xl mb-6">Login</h2>
+        <div class="bg-transparent h-screen flex flex-col items-center justify-center">
+        <img src="assets/image/logo3.png" alt="" width="400" class="">
+            <div class="p-8 rounded shadow-md max-w-md w-full bg-white bg-opacity-50">
+                <h2 class="text-2xl mb-6 text-center fw-bold">Login</h2>
                 <?php if ($errors): ?>
                 <ul class="text-red-500 mb-4">
                     <?php foreach ($errors as $error): ?>
@@ -69,25 +79,27 @@ require 'components/header.php';
                 <?php endif; ?>
                 <form action="login.php" method="POST">
                     <div class="mb-4">
-                        <label for="identifier" class="block text-gray-700">Username or Email:</label>
+                        <label for="identifier" class="block text-black">Username or Email:</label>
                         <input type="text" id="identifier" name="identifier" class="form-input mt-1 block w-full"
                             autofocus>
                     </div>
 
                     <div class="mb-4">
-                        <label for="password" class="block text-gray-700">Password:</label>
-                        <input type="password" id="password" name="password" class="form-input mt-1 block w-full">
+                        <label for="password" class="block text-black">Password:</label>
+                        <input type="password" id="password" name="password" class="form-input mt-1 block w-full text-black">
                     </div>
 
                     <button type="submit"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Login</button>
+                        class="bg-blue-500 hover:bg-blue-600 text-white fw-bold px-4 py-2 rounded">Login</button>
                 </form>
                 <p>Belum mempunyai akun?
-                    <a href="register.php">buat sekarang</a>
+                    <a href="register.php">Buat sekarang</a>
                 </p>
             </div>
         </div>
     </section>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
+
 </body>
 
 </html>
