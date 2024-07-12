@@ -81,8 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <section>
         <div class="bg-transparent h-screen flex flex-col items-center justify-center">
-            <img src="assets/image/logo3.png" alt="" class="mt-10">
-            <div class="max-w-md mx-auto mb-20 bg-white p-8 rounded shadow-md bg-opacity-50">
+            <div class="max-w-md mx-auto my-3   0 bg-white p-8 rounded shadow-md bg-opacity-70">
+                <img src="assets/image/logo3.png" alt="" class="mt-0">
                 <h2 class="text-2xl mb-4 text-center">Register</h2>
                 <?php if (!empty($errors)): ?>
                 <ul class="text-red-500">
@@ -94,29 +94,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <form action="register.php" method="POST">
                     <div class="mb-4">
                         <label for="username" class="block text-sm font-medium text-gray-700">Username:</label>
-                        <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($username); ?>"
+                        <input type="text" id="username" name="username"
+                            value="<?php echo htmlspecialchars($username); ?>"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-    
+
                     <div class="mb-4">
                         <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
                         <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-    
+
                     <div class="mb-4">
                         <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
                         <input type="password" id="password" name="password"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-    
+
                     <div class="mb-4">
                         <label for="passwordConfirm" class="block text-sm font-medium text-gray-700">Confirm
                             Password:</label>
                         <input type="password" id="passwordConfirm" name="passwordConfirm"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-    
+
                     <div class="mb-4">
                         <label for="role" class="block text-sm font-medium text-gray-700">Role:</label>
                         <select id="role" name="role"
@@ -125,17 +126,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <option value="admin" <?php if ($role === 'admin') echo 'selected'; ?>>Admin</option>
                         </select>
                     </div>
-    
+
                     <button type="submit"
                         class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         Register
                     </button>
                 </form>
-                <p class="mt-2 text-center">Sudah mempunyai akun? <a href="login.php">Login Sekarang</a></p>
+                <p class="mt-2 text-center">Sudah mempunyai akun? <a href="login.php" class="text-blue-900 hover:text-blue-500">Login Sekarang</a></p>
             </div>
         </div>
     </section>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
 </body>
 

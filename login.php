@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_start();
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
+            $_SESSION['name'] = $user['name'];
             $_SESSION['role'] = $user['role'];
             
             // Redirect based on user role
@@ -67,8 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <section>
         <div class="bg-transparent h-screen flex flex-col items-center justify-center">
-        <img src="assets/image/logo3.png" alt="" width="400" class="">
-            <div class="p-8 rounded shadow-md max-w-md w-full bg-white bg-opacity-50">
+            <div class="p-8 rounded shadow-md max-w-md w-full bg-white bg-opacity-70">
+                <img src="assets/image/logo3.png" alt="" width="400" class="">
                 <h2 class="text-2xl mb-6 text-center fw-bold">Login</h2>
                 <?php if ($errors): ?>
                 <ul class="text-red-500 mb-4">
@@ -86,14 +87,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="mb-4">
                         <label for="password" class="block text-black">Password:</label>
-                        <input type="password" id="password" name="password" class="form-input mt-1 block w-full text-black">
+                        <input type="password" id="password" name="password"
+                            class="form-input mt-1 block w-full text-black">
                     </div>
 
                     <button type="submit"
                         class="bg-blue-500 hover:bg-blue-600 text-white fw-bold px-4 py-2 rounded">Login</button>
                 </form>
                 <p>Belum mempunyai akun?
-                    <a href="register.php">Buat sekarang</a>
+                    <a href="register.php" class="text-blue-900 hover:text-blue-500">Buat sekarang</a>
                 </p>
             </div>
         </div>
