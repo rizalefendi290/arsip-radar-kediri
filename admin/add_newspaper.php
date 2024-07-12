@@ -1,5 +1,4 @@
 <?php
-// Pastikan hanya admin yang dapat mengakses halaman ini
 session_start();
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header('Location: index.php'); // Redirect ke halaman login jika bukan admin
@@ -48,14 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Insert data ke database jika file berhasil diunggah
             $stmt = $pdo->prepare('INSERT INTO newspapers (title, publication_date, category, pdf_file) VALUES (?, ?, ?, ?)');
             if ($stmt->execute([$title, $publication_date, $category, $pdf_file_path])) {
-                echo '<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">';
-                echo '<strong class="font-bold">Sukses!</strong>';
-                echo '<span class="block sm:inline"> Data koran berhasil ditambahkan.</span>';
-                echo '</div>';
-                // Kosongkan variabel setelah berhasil
-                $title = '';
-                $publication_date = '';
-                $category = '';
+                $_SESSION['success'] = 'Data koran berhasil ditambahkan.';
+                header('Location: add_newspaper.php');
+                exit();
             } else {
                 echo '<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">';
                 echo '<strong class="font-bold">Error!</strong>';
@@ -79,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-gray-100">
@@ -98,7 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <form action="add_newspaper.php" method="POST" enctype="multipart/form-data"
                     class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
                     <?php if (!empty($errors)): ?>
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+                        role="alert">
                         <strong class="font-bold">Error!</strong>
                         <span class="block sm:inline"> Terdapat kesalahan pada form:</span>
                         <ul class="mt-3 list-disc list-inside">
@@ -108,43 +104,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </ul>
                     </div>
                     <?php endif; ?>
-    
+
                     <div class="mb-4">
                         <label for="title" class="block text-gray-700 font-bold mb-2">Judul</label>
                         <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($title ?? ''); ?>"
                             class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
                     </div>
-    
+
                     <div class="mb-4">
                         <label for="publication_date" class="block text-gray-700 font-bold mb-2">Tanggal Terbit</label>
                         <input type="date" id="publication_date" name="publication_date"
                             value="<?php echo htmlspecialchars($publication_date ?? ''); ?>"
                             class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
                     </div>
-    
+
                     <div class="mb-4">
                         <label for="category" class="block text-gray-700 font-bold mb-2">Kategori</label>
                         <input type="text" id="category" name="category"
                             value="<?php echo htmlspecialchars($category ?? ''); ?>"
                             class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
                     </div>
-    
+
                     <div class="mb-4">
                         <label for="pdf_file" class="block text-gray-700 font-bold mb-2">File PDF</label>
                         <input type="file" id="pdf_file" name="pdf_file"
                             class="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500">
                     </div>
-    
+
                     <button type="submit"
                         class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Simpan</button>
                 </form>
+
+                <?php if (isset($_SESSION['success'])): ?>
+                <script>
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: '<?php echo $_SESSION['success']; ?>',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'admin_dashboard.php';
+                });
+                <?php unset($_SESSION['success']); // Hapus notifikasi dari sesi setelah ditampilkan ?>
+                </script>
+                <?php endif; ?>
             </main>
         </div>
-
-
     </div>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
     <script src="../js/app.js"></script>
+    <script src="sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

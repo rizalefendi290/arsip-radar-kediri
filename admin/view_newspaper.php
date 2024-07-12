@@ -44,9 +44,9 @@ if (!$newspaper) {
             </a>
             <div class="flex items-center space-x-6 rtl:space-x-reverse">
                 <?php
-                if (isset($_SESSION['username'])) {
+                if (isset($_SESSION['name'])) {
                     // Jika user sudah login
-                    $username = htmlspecialchars($_SESSION['username']);
+                    $username = htmlspecialchars($_SESSION['name']);
                     $role = $_SESSION['role'];
 
                     echo '<div class="relative inline-block text-left">';

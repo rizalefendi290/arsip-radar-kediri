@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>"
+    <script src="sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="sweetalert2.min.css">
 </head>
 
 <body>
@@ -137,14 +139,14 @@
                                 aria-expanded="false" data-dropdown-toggle="dropdown-user">
                                 <span class="sr-only">Open user menu</span>
                                 <?php
-                                    if (isset($_SESSION['username'])) {
+                                    if (isset($_SESSION['name'])) {
                                         // Jika user sudah login
-                                        $username = htmlspecialchars($_SESSION['username']);
+                                        $name = htmlspecialchars($_SESSION['name']);
                                         $role = $_SESSION['role'];
 
                                         echo '<div class="relative inline-block text-left">';
-                                        echo '<button id="dropdown-toggle" type="button" class="text-white hover:underline focus:outline-none">';
-                                        echo $username;
+                                        echo '<button id="dropdown-toggle" type="button" class="text-white text-xl underline hover:underline focus:outline-none">';
+                                        echo $name;
                                         echo '</button>';
                                         echo '<div id="dropdown-menu" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 hidden">';
                                         echo '<div class="py-1">';
@@ -274,6 +276,7 @@
     <script src="https://kit.fontawesome.com/8e23404ed8.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
     <script src="../js/app.js"></script>
+    <script src="sweetalert2.all.min.js"></script>
 </body>
 
 </html>

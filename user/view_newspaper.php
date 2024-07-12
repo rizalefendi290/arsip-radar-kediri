@@ -38,20 +38,20 @@ if (!$newspaper) {
 <body class="bg-gray-100">
     <nav class="bg-white border-gray-200 dark:bg-gray-900">
         <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
-            <a href="https://flowbite.com" class="flex items-center space-x-3 rtl:space-x-reverse">
+            <a href="../index.php" class="flex items-center space-x-3 rtl:space-x-reverse">
                 <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" />
                 <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Perpustakaan Digital
                     Radar Kediri</span>
             </a>
             <div class="flex items-center space-x-6 rtl:space-x-reverse">
                 <?php
-                if (isset($_SESSION['username'])) {
+                if (isset($_SESSION['name'])) {
                     // Jika user sudah login
-                    $username = htmlspecialchars($_SESSION['username']);
+                    $username = htmlspecialchars($_SESSION['name']);
                     $role = $_SESSION['role'];
 
                     echo '<div class="relative inline-block text-left">';
-                    echo '<button id="dropdown-toggle" type="button" class="text-white hover:underline focus:outline-none">';
+                    echo '<button id="dropdown-toggle" type="button" class="text-white text-xl underline hover:underline focus:outline-none">';
                     echo $username;
                     echo '</button>';
                     echo '<div id="dropdown-menu" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 hidden">';
@@ -59,7 +59,6 @@ if (!$newspaper) {
                     echo '<a href="../profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>';
                     if ($role === 'admin') {
                         echo '<a href="../index.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Beranda</a>';
-                        echo '<a href="../admin/panduan_admin.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Panduan Admin</a>';
                         echo '<a href="../admin/admin_dashboard.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard Admin</a>'; // Tambahkan tautan ke dashboard admin
                     }
                     echo '<a href="logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>';
@@ -121,7 +120,13 @@ if (!$newspaper) {
                     </li>
                 </ol>
                 <a href="../index.php"
-                    class="mt-4 ml-4 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded inline-block">Kembali</a>
+                    class="flex mt-4 ml-4 bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded inline-block">
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 12h14M5 12l4-4m-4 4 4 4" />
+                    </svg>
+                    Kembali</a>
             </nav>
         </div>
     </header>
@@ -131,14 +136,14 @@ if (!$newspaper) {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="p-4">
                 <h2 class="text-xl font-bold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
-                <p class="text-gray-600 mb-2">Tanggal Terbit:
+                <p class="text-black text-2xl mb-2">Tanggal Terbit:
                     <?php echo htmlspecialchars($newspaper['publication_date']); ?></p>
-                <p class="text-gray-600 mb-2">Kategori: <?php echo htmlspecialchars($newspaper['category']); ?></p>
+                <p class="text-black text-xl mb-2">Kategori: <?php echo htmlspecialchars($newspaper['category']); ?></p>
             </div>
             <div class="p-4">
                 <object data="../uploads/<?php echo htmlspecialchars($newspaper['pdf_file']); ?>" type="application/pdf"
                     width="100%" height="800px">
-                    <p class="text-gray-600">Maaf, browser Anda tidak mendukung penampilan PDF. Silakan <a
+                    <p class="text-black">Maaf, browser Anda tidak mendukung penampilan PDF. Silakan <a
                             href="../uploads/<?php echo htmlspecialchars($newspaper['pdf_file']); ?>">unduh dokumen</a>
                         untuk melihatnya.</p>
                 </object>
@@ -149,8 +154,8 @@ if (!$newspaper) {
     <?php
 require '../components/footer.php'
 ?>
-<script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
-<script src="../js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 
 </html>
