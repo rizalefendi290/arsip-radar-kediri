@@ -75,7 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($stmt->execute($params)) {
-            header('Location: admin_dashboard.php'); // Redirect ke halaman admin setelah berhasil menyimpan
+            $_SESSION['edit_success'] = true; // Set session variable to indicate success
+            header('Location: edit_newspaper.php?id=' . $id); // Redirect ke halaman edit setelah berhasil menyimpan
             exit;
         } else {
             $errors[] = 'Gagal menyimpan perubahan';
@@ -94,10 +95,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Edit Koran - <?php echo htmlspecialchars($newspaper['title']); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-gray-100">
-<nav class="bg-white border-gray-200 dark:bg-gray-900">
+    <nav class="bg-white border-gray-200 dark:bg-gray-900">
         <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
             <a href="https://flowbite.com" class="flex items-center space-x-3 rtl:space-x-reverse">
                 <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" />
@@ -138,9 +140,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </nav>
     <!-- Header -->
     <header class="bg-white shadow">
-        <div class="container mx-auto py-4 px-4">
+        <div class="container mx-auto py-4 px-4 flex justify-between">
             <h1 class="text-2xl font-bold">Edit Koran - <?php echo htmlspecialchars($newspaper['title']); ?></h1>
+            
+            <a href="admin_dashboard.php"
+                    class="flex bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded inline-block">
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 12h14M5 12l4-4m-4 4 4 4" />
+                    </svg>
+                    Kembali
+                </a>
         </div>
+        
     </header>
 
     <!-- Main Content -->
@@ -188,8 +201,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php
 require '../components/footer.php'
 ?>
-<script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
-<script src="../js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            <?php if (isset($_SESSION['edit_success'])): ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: 'Data koran berhasil diedit!',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    <?php unset($_SESSION['edit_success']); ?>
+                    window.location.href = 'edit_newspaper.php?id=<?php echo $id; ?>'; // Redirect back to same page
+                });
+            <?php endif; ?>
+        });
+    </script>
 </body>
 
 </html>
