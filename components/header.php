@@ -22,7 +22,7 @@ if (isset($_SESSION['role'])) {
         <a href="index.php" class="flex items-center space-x-3 rtl:space-x-reverse text-center sm:text-left">
             <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" />
             <span class="self-center text-lg sm:text-sm md:text-lg font-semibold whitespace-nowrap dark:text-white">
-                Arsip Radar Kediri
+                Perpustakaan Digital
             </span>
         </a>
 

@@ -9,15 +9,28 @@ $itemsPerPage = 10; // jumlah item per halaman
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $itemsPerPage;
 
+// Filter tipe koran
+$newspaperType = isset($_GET['newspaper_type']) ? $_GET['newspaper_type'] : '';
+
 // Hitung total item
-$stmt = $pdo->prepare('SELECT COUNT(*) FROM newspapers');
-$stmt->execute();
+if ($newspaperType) {
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM newspapers WHERE newspaper_type = ?');
+    $stmt->execute([$newspaperType]);
+} else {
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM newspapers');
+    $stmt->execute();
+}
 $totalItems = $stmt->fetchColumn();
 $totalPages = ceil($totalItems / $itemsPerPage);
 
 // Ambil data koran
-$stmt = $pdo->prepare('SELECT * FROM newspapers LIMIT ? OFFSET ?');
-$stmt->execute([$itemsPerPage, $offset]);
+if ($newspaperType) {
+    $stmt = $pdo->prepare('SELECT * FROM newspapers WHERE newspaper_type = ? LIMIT ? OFFSET ?');
+    $stmt->execute([$newspaperType, $itemsPerPage, $offset]);
+} else {
+    $stmt = $pdo->prepare('SELECT * FROM newspapers LIMIT ? OFFSET ?');
+    $stmt->execute([$itemsPerPage, $offset]);
+}
 $newspapers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (isset($_SESSION['role'])) {
@@ -43,7 +56,8 @@ if (isset($_SESSION['role'])) {
             <a href="index.php" class="flex items-center space-x-3 rtl:space-x-reverse">
                 <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" />
                 <span
-                    class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white sm:text-m md:text-md">Arsip Radar Kediri</span>
+                    class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white sm:text-m md:text-md">Perpustakaan
+                    Digital</span>
             </a>
             <button data-collapse-toggle="navbar-default" type="button"
                 class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
@@ -68,14 +82,14 @@ if (isset($_SESSION['role'])) {
                             class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Semua
                             Koran</a>
                     </li>
-                    </li>
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                     <li>
                         <a href="../admin/admin_dashboard.php"
                             class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Dashboard
                             Admin</a>
                     </li>
-                    <?php endif; ?> <li class="relative">
+                    <?php endif; ?>
+                    <li class="relative">
                         <?php if (isset($_SESSION['name'])): ?>
                         <button id="userMenuButton"
                             class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
@@ -130,13 +144,13 @@ if (isset($_SESSION['role'])) {
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                     stroke-width="2" d="m1 9 4-4-4-4" />
                             </svg>
-                            <span
-                                class="ms-1 text-sm font-medium text-black hover:text-blue-600 dark:hover:text-gray-600">Semua
+                            <span class="ml-1 text-sm font-medium text-gray-800 md:ml-2 rtl:ml-0 rtl:mr-2">Daftar
                                 Koran</span>
                         </div>
                     </li>
                 </ol>
-                <form class="flex-grow max-w-md mx-4 mt-4 md:mt-0" action="../search.php" method="GET">
+
+                <form class="flex-grow max-w-md mx-auto mt-4 md:mt-0" action="../search.php" method="GET">
                     <label for="default-search"
                         class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
                     <div class="relative">
@@ -154,104 +168,184 @@ if (isset($_SESSION['role'])) {
                             class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
                     </div>
                 </form>
-                <a href="../index.php"
-                    class="flex bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded inline-block mt-4 md:mt-0">
-                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M5 12h14M5 12l4-4m-4 4 4 4" />
-                    </svg>
-                    Kembali
-                </a>
+                <div class="mt-4 md:mt-0">
+                    <form action="" method="get">
+                        <label for="newspaper_type" class="sr-only">Filter Tipe Koran:</label>
+                        <select name="newspaper_type" id="newspaper_type"
+                            class="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring focus:ring-blue-300 focus:outline-none">
+                            <option value="">Semua Tipe</option>
+                            <option value="jurnal" <?php if ($newspaperType == 'jurnal') echo 'selected'; ?>>Jurnal
+                            </option>
+                            <option value="koran" <?php if ($newspaperType == 'koran') echo 'selected'; ?>>Koran
+                            </option>
+                            <option value="artikel" <?php if ($newspaperType == 'artikel') echo 'selected'; ?>>Artikel
+                            </option>
+                        </select>
+                        <button type="submit"
+                            class="ml-2 px-4 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600">Filter</button>
+                    </form>
+                </div>
             </nav>
         </div>
     </header>
+    <div class="container mx-auto items-center flex justify-between">
+        <a href="../index.php"
+            class="flex bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded inline-block">
+            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 12h14M5 12l4-4m-4 4 4 4" />
+            </svg>
+            Kembali
+        </a>
+    </div>
 
-    <div class="container mx-auto px-4 py-4">
-        <?php if (count($newspapers) > 0) : ?>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            <?php foreach ($newspapers as $index => $newspaper) : ?>
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                <div class="px-4 py-5 sm:px-6">
-                    <a href="user/view_newspaper.php?id=<?php echo $newspaper['id']; ?>">
-                        <h3 class="text-lg font-bold leading-6 text-black hover:text-gray-700">
-                            <?php echo htmlspecialchars($newspaper['title']); ?>
-                        </h3>
-                    </a>
-                    <p class="mt-1 max-w-2xl text-sm text-gray-950">
-                        <?php echo htmlspecialchars($newspaper['category']); ?>
-                    </p>
-                </div>
-                <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
-                    <dl class="sm:divide-y sm:divide-gray-200">
-                        <div class="flex justify-between">
-                            <dt class="text-sm font-medium text-black ms-5">
-                                Tanggal Terbit: <?php echo date('d-m-Y', strtotime($newspaper['publication_date'])); ?>
-                            </dt>
+    <div class="container mx-auto px-4 py-6">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead>
+                        <tr>
+                            <th
+                                class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
+                                Judul</th>
+                            <th
+                                class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
+                                Tanggal Terbit</th>
+                            <th
+                                class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
+                                Tipe</th>
+                            <th
+                                class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
+                                Kategori</th>
+                            <th
+                                class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
+                                Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        <?php foreach ($newspapers as $newspaper): ?>
+                        <tr>
+                            <td class="px-6 py-4 border-b border-gray-300">
+                                <?php echo htmlspecialchars($newspaper['title']); ?></td>
+                            <td class="px-6 py-4 border-b border-gray-300">
+                                <?php echo htmlspecialchars($newspaper['publication_date']); ?></td>
+                            <td class="px-6 py-4 border-b border-gray-300">
+                                <?php echo htmlspecialchars($newspaper['newspaper_type']); ?></td>
+                            <td class="px-6 py-4 border-b border-gray-300">
+                                <?php echo htmlspecialchars($newspaper['category']); ?></td>
+                            <td class="px-6 py-4 border-b border-gray-300">
+                                <a href="view_newspaper.php?id=<?php echo $newspaper['id']; ?>"
+                                    class="text-blue-500 hover:text-blue-700">Lihat</a>
+                                <?php if ($role === 'admin'): ?>
+                                <a href="../admin/edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
+                                    class="text-green-500 hover:text-green-700 ml-2">Edit</a>
+                                <a href="../delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
+                                    class="text-red-500 hover:text-red-700 ml-2"
+                                    onclick="return confirm('Apakah Anda yakin ingin menghapus koran ini?');">Hapus</a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        <a href="?page=<?php echo max($page - 1, 1); ?>&newspaper_type=<?php echo $newspaperType; ?>"
+                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</a>
+                        <a href="?page=<?php echo min($page + 1, $totalPages); ?>&newspaper_type=<?php echo $newspaperType; ?>"
+                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</a>
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Showing
+                                <span class="font-medium"><?php echo ($offset + 1); ?></span>
+                                to
+                                <span
+                                    class="font-medium"><?php echo min($offset + $itemsPerPage, $totalItems); ?></span>
+                                of
+                                <span class="font-medium"><?php echo $totalItems; ?></span>
+                                results
+                            </p>
                         </div>
-                    </dl>
-                </div>
-                <div class="px-4 py-4 sm:px-6">
-                    <div class="flex justify-center">
-                        <a href="view_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                            class="text-green-600 hover:text-green-900 mr-2">Lihat</a>
-                        <?php if (isset($role) && $role === 'admin') : ?>
-                        <a href="../admin/edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                            class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
-                        <a href="../admin/delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                            class="text-red-600 hover:text-red-900"
-                            onclick="return confirm('Are you sure you want to delete this newspaper?')">Delete</a>
-                        <?php endif; ?>
+                        <div>
+                            <nav class="relative z-0 inline-flex shadow-sm -space-x-px" aria-label="Pagination">
+                                <a href="?page=1&newspaper_type=<?php echo $newspaperType; ?>"
+                                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">First</span>
+                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                                    </svg>
+                                </a>
+                                <a href="?page=<?php echo max($page - 1, 1); ?>&newspaper_type=<?php echo $newspaperType; ?>"
+                                    class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Previous</span>
+                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </a>
+                                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <a href="?page=<?php echo $i; ?>&newspaper_type=<?php echo $newspaperType; ?>"
+                                    class="relative inline-flex items-center px-4 py-2 border <?php echo $page == $i ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'; ?> text-sm font-medium">
+                                    <?php echo $i; ?>
+                                </a>
+                                <?php endfor; ?>
+                                <a href="?page=<?php echo min($page + 1, $totalPages); ?>&newspaper_type=<?php echo $newspaperType; ?>"
+                                    class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Next</span>
+                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </a>
+                                <a href="?page=<?php echo $totalPages; ?>&newspaper_type=<?php echo $newspaperType; ?>"
+                                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Last</span>
+                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 17l5-5m0 0l-5-5m5 5H6" />
+                                    </svg>
+                                </a>
+                            </nav>
+                        </div>
                     </div>
                 </div>
             </div>
-            <?php endforeach; ?>
         </div>
-
-        <div class="mt-4">
-            <nav class="flex justify-center">
-                <ul class="pagination flex items-center space-x-2">
-                    <?php if ($page > 1) : ?>
-                    <li>
-                        <a href="?page=<?php echo $page - 1; ?>"
-                            class="px-3 py-2 bg-gray-300 text-gray-800 rounded">Previous</a>
-                    </li>
-                    <?php endif; ?>
-                    <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
-                    <li>
-                        <a href="?page=<?php echo $i; ?>"
-                            class="px-3 py-2 <?php echo $i === $page ? 'bg-gray-800 text-white' : 'bg-gray-300 text-gray-800'; ?> rounded"><?php echo $i; ?></a>
-                    </li>
-                    <?php endfor; ?>
-                    <?php if ($page < $totalPages) : ?>
-                    <li>
-                        <a href="?page=<?php echo $page + 1; ?>"
-                            class="px-3 py-2 bg-gray-300 text-gray-800 rounded">Next</a>
-                    </li>
-                    <?php endif; ?>
-                </ul>
-            </nav>
-        </div>
-        <?php else : ?>
-        <p class="text-gray-600">Tidak ada data koran yang ditemukan.</p>
-        <?php endif; ?>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
-    <script src="js/app.js"></script>
     <script>
-    // Script untuk menangani menu drawer
-    const showButton = document.querySelector('[data-drawer-show]');
-    const hideButton = document.querySelector('[data-drawer-hide]');
-    const drawer = document.getElementById('drawer-disable-body-scrolling');
-
-    showButton.addEventListener('click', function() {
-        drawer.classList.remove('-translate-x-full');
-    });
-
-    hideButton.addEventListener('click', function() {
-        drawer.classList.add('-translate-x-full');
-    });
+    const role = "<?php echo $role; ?>";
+    </script>
+        <script>
+    function confirmDelete(newspaperId) {
+        Swal.fire({
+            title: 'Delete Newspaper',
+            text: 'Are you sure you want to delete this newspaper?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect to delete script with newspaperId
+                window.location.href = 'delete_newspaper.php?id=' + newspaperId;
+            }
+        });
+        // Prevent the default action of the link
+        return false;
+    }
     </script>
 </body>
 

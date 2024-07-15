@@ -1,43 +1,38 @@
 <?php
-// Pastikan hanya admin yang dapat mengakses halaman ini
 session_start();
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header('Location: index.php'); // Redirect ke halaman login jika bukan admin
+    header('Location: index.php');
     exit;
 }
 
-// Hubungkan ke database atau include config
 require '../config.php';
 
-// Ambil ID koran dari query parameter
 $id = $_GET['id'] ?? null;
 if (!$id) {
-    header('Location: admin_dashboard.php'); // Redirect ke halaman admin jika tidak ada ID
+    header('Location: admin_dashboard.php');
     exit;
 }
 
-// Ambil data koran dari database
 $stmt = $pdo->prepare('SELECT * FROM newspapers WHERE id = ?');
 $stmt->execute([$id]);
 $newspaper = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$newspaper) {
-    header('Location: admin_dashboard.php'); // Redirect ke halaman admin jika koran tidak ditemukan
+    header('Location: admin_dashboard.php');
     exit;
 }
 
-// Proses form jika ada POST data
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'];
     $publication_date = $_POST['publication_date'];
     $category = $_POST['category'];
+    $newspaper_type = $_POST['newspaper_type'];
     
-    // Handling file upload (optional)
     $fileUploaded = false;
     $fileUploadDir = '../uploads/';
-    $fileNewPath = $newspaper['pdf_file']; // default to existing file path
+    $fileNewPath = $newspaper['pdf_file'];
 
     if ($_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $fileName = $_FILES['file']['name'];
@@ -57,10 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $stmt = $pdo->prepare('UPDATE newspapers SET title = ?, publication_date = ?, category = ?, pdf_file = ? WHERE id = ?');
-        $params = [$title, $publication_date, $category, $fileNewPath, $id];
+        $stmt = $pdo->prepare('UPDATE newspapers SET title = ?, publication_date = ?, category = ?, newspaper_type = ?, pdf_file = ? WHERE id = ?');
+        $params = [$title, $publication_date, $category, $newspaper_type, $fileNewPath, $id];
         if (!$fileUploaded) {
-            $params = [$title, $publication_date, $category, $newspaper['pdf_file'], $id];
+            $params = [$title, $publication_date, $category, $newspaper_type, $newspaper['pdf_file'], $id];
         }
         if ($stmt->execute($params)) {
             $_SESSION['edit_success'] = true;
@@ -99,39 +94,35 @@ if (isset($_SESSION['role'])) {
                 <div class="flex-1 p-4">
                     <header class="bg-white shadow mb-4">
                         <div class="container mx-auto py-4 px-4 flex justify-between">
-                            <h1 class="text-2xl font-bold">Edit Koran -
-                                <?php echo htmlspecialchars($newspaper['title']); ?>
-                            </h1>
+                            <h1 class="text-2xl font-bold">Edit Koran - <?php echo htmlspecialchars($newspaper['title']); ?></h1>
                         </div>
                     </header>
                     <div class="bg-white shadow-md rounded-lg p-4">
                         <?php if (!empty($errors)): ?>
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded relative"
-                            role="alert">
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded relative" role="alert">
                             <strong class="font-bold">Terjadi kesalahan!</strong>
                             <span class="block sm:inline"><?php echo implode('<br>', $errors); ?></span>
                         </div>
                         <?php endif; ?>
-                        <form action="edit_newspaper.php?id=<?php echo $id; ?>" method="POST"
-                            enctype="multipart/form-data">
+                        <form action="edit_newspaper.php?id=<?php echo $id; ?>" method="POST" enctype="multipart/form-data">
                             <div class="mb-4">
                                 <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Judul:</label>
-                                <input type="text" id="title" name="title"
-                                    value="<?php echo htmlspecialchars($newspaper['title']); ?>"
+                                <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($newspaper['title']); ?>"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                             </div>
                             <div class="mb-4">
-                                <label for="publication_date" class="block text-gray-700 text-sm font-bold mb-2">Tanggal
-                                    Terbit:</label>
-                                <input type="date" id="publication_date" name="publication_date"
-                                    value="<?php echo htmlspecialchars($newspaper['publication_date']); ?>"
+                                <label for="publication_date" class="block text-gray-700 text-sm font-bold mb-2">Tanggal Terbit:</label>
+                                <input type="date" id="publication_date" name="publication_date" value="<?php echo htmlspecialchars($newspaper['publication_date']); ?>"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                             </div>
                             <div class="mb-4">
-                                <label for="category"
-                                    class="block text-gray-700 text-sm font-bold mb-2">Kategori:</label>
-                                <input type="text" id="category" name="category"
-                                    value="<?php echo htmlspecialchars($newspaper['category']); ?>"
+                                <label for="category" class="block text-gray-700 text-sm font-bold mb-2">Kategori:</label>
+                                <input type="text" id="category" name="category" value="<?php echo htmlspecialchars($newspaper['category']); ?>"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            </div>
+                            <div class="mb-4">
+                                <label for="newspaper_type" class="block text-gray-700 text-sm font-bold mb-2">Tipe Koran:</label>
+                                <input type="text" id="newspaper_type" name="newspaper_type" value="<?php echo htmlspecialchars($newspaper['newspaper_type']); ?>"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                             </div>
                             <div class="mb-4">

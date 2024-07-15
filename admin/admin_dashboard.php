@@ -205,6 +205,9 @@ $totalPages = ceil($totalResults / $limit);
                                             <span class="text-sm font-bold text-black">Kategori</span>
                                         </th>
                                         <th class="py-2 px-4">
+                                            <span class="text-sm font-bold text-black">Tipe</span>
+                                        </th>
+                                        <th class="py-2 px-4">
                                             <span class="text-sm font-bold text-black">Aksi</span>
                                         </th>
                                     </tr>
@@ -227,6 +230,10 @@ $totalPages = ceil($totalResults / $limit);
                                         <td class="py-2 px-4 whitespace-nowrap">
                                             <span
                                                 class="text-sm text-gray-900"><?php echo htmlspecialchars($newspaper['category']); ?></span>
+                                        </td>
+                                        <td class="py-2 px-4 whitespace-nowrap">
+                                            <span
+                                                class="text-sm text-gray-900"><?php echo htmlspecialchars($newspaper['newspaper_type']); ?></span>
                                         </td>
                                         <td class="py-2 px-4 whitespace-nowrap">
                                             <a href="view_newspaper.php?id=<?php echo $newspaper['id']; ?>"

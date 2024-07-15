@@ -38,15 +38,17 @@ if (isset($_SESSION['role'])) {
     <!-- Tambahkan link CSS untuk styling (misalnya menggunakan Tailwind CSS) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-gray-100">
-<nav class="bg-white border-gray-200 dark:bg-gray-900">
+    <nav class="bg-white border-gray-200 dark:bg-gray-900">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="index.php" class="flex items-center space-x-3 rtl:space-x-reverse">
                 <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" />
                 <span
-                    class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white sm:text-m md:text-md">Arsip Radar Kediri</span>
+                    class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white sm:text-m md:text-md">Perpustakaan
+                    Digital</span>
             </a>
             <button data-collapse-toggle="navbar-default" type="button"
                 class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
@@ -110,12 +112,86 @@ if (isset($_SESSION['role'])) {
             </div>
         </div>
     </nav>
-
+    <header class="shadow">
+        <div class="container mx-auto py-4 px-4">
+            <nav class="flex flex-col items-center md:flex-row md:justify-between" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+                    <li class="inline-flex items-center">
+                        <a href="../index.php"
+                            class="inline-flex items-center text-sm font-medium text-black hover:text-blue-600 dark:hover:text-gray-600">
+                            <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="m19 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
+                            </svg>
+                            Beranda
+                        </a>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m1 9 4-4-4-4" />
+                            </svg>
+                            <span
+                                class="ms-1 text-sm font-medium text-black hover:text-blue-600 dark:hover:text-gray-600">Lihat
+                                Koran</span>
+                        </div>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m1 9 4-4-4-4" />
+                            </svg>
+                            <span
+                                class="ms-1 text-sm font-medium text-black hover:text-blue-600 dark:hover:text-gray-600">Koran
+                                <?php echo htmlspecialchars($newspaper['title']); ?></span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </header>
     <!-- Main Content -->
     <main class="container mx-auto py-4 px-4">
+        <div class="container mx-auto items-center flex justify-between">
+            <a href="../index.php"
+                class="flex bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded inline-block">
+                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 12h14M5 12l4-4m-4 4 4 4" />
+                </svg>
+                Kembali
+            </a>
+
+            <form class="flex-grow max-w-md mx-auto mt-4 md:mt-0" action="../search.php" method="GET">
+                <label for="default-search"
+                    class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                        </svg>
+                    </div>
+                    <input type="search" id="default-search" name="query"
+                        class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        placeholder="Telusuri, Koran..." required />
+                    <button type="submit"
+                        class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+                </div>
+            </form>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="p-4">
                 <h2 class="text-xl font-bold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
+                <p class="text-black text-2xl mb-2">Tipe : 
+                    <?php echo htmlspecialchars($newspaper['newspaper_type']); ?></p>
                 <p class="text-black text-2xl mb-2">Tanggal Terbit:
                     <?php echo htmlspecialchars($newspaper['publication_date']); ?></p>
                 <p class="text-black text-xl mb-2">Kategori: <?php echo htmlspecialchars($newspaper['category']); ?></p>
@@ -136,6 +212,7 @@ require '../components/footer.php'
 ?>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
     <script src="../js/app.js"></script>
+    <script src="sweetalert2.all.min.js"></script>
 </body>
 
 </html>
