@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']); // Menambahkan pengambilan input name
     $password = $_POST['password'];
     $passwordConfirm = $_POST['passwordConfirm'];
-    $role = 'user';  // Get role from form input
+    $role = 'admin';  // Get role from form input
 
     // Validasi username
     if (empty($username)) {
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="bg-transparent h-screen flex flex-col items-center justify-center">
             <div class="max-w-md mx-auto my-3   0 bg-white p-8 rounded shadow-md bg-opacity-70">
                 <img src="assets/image/logo3.png" alt="" class="mt-0">
-                <h2 class="text-2xl mb-4 text-center">Register</h2>
+                <h2 class="text-2xl mb-4 text-center">Register Admin</h2>
                 <?php if (!empty($errors)): ?>
                 <ul class="text-red-500">
                     <?php foreach ($errors as $error): ?>
