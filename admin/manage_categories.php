@@ -22,7 +22,6 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Data Kategori</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
-    <script src="sweetalert2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gray-100">
@@ -52,7 +51,7 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td class="border-b border-gray-300 py-2 px-4">
                         <a href="edit_kategori.php?id=<?php echo $category['id']; ?>" class="text-blue-500 hover:text-blue-700">Edit</a>
                         <span class="mx-1">|</span>
-                        <a href="hapus_kategori.php?id=<?php echo $category['id']; ?>" class="text-red-500 hover:text-red-700" onclick="return confirm('Anda yakin ingin menghapus kategori ini?')">Hapus</a>
+                        <a href="hapus_kategori.php?id=<?php echo $category['id']; ?>" class="text-red-500 hover:text-red-700 delete-link">Hapus</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -61,6 +60,30 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
         </div>
     </div>
+
+    <script>
+        // Script untuk Sweet Alert konfirmasi penghapusan
+        document.querySelectorAll('.delete-link').forEach(item => {
+            item.addEventListener('click', event => {
+                event.preventDefault();
+                const url = event.target.getAttribute('href');
+
+                Swal.fire({
+                    title: 'Anda yakin?',
+                    text: "Anda tidak akan dapat mengembalikan ini!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus saja!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url; // Redirect jika dikonfirmasi
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>
