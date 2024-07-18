@@ -30,16 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $filterDate = sprintf('%04d-%02d-%02d', $filterYear, $filterMonth, $filterDay);
 
         // Filter berdasarkan tanggal
-        $sql .= ' WHERE YEAR(created_date) = :filterYear AND MONTH(created_date) = :filterMonth AND DAY(created_date) = :filterDay';
-        $stmt->bindParam(':filterYear', $filterYear, PDO::PARAM_INT);
-        $stmt->bindParam(':filterMonth', $filterMonth, PDO::PARAM_INT);
-        $stmt->bindParam(':filterDay', $filterDay, PDO::PARAM_INT);
-
-        // Query untuk menghitung jumlah total data dengan filter tanggal
-        $countSql .= ' WHERE YEAR(created_date) = :filterYear AND MONTH(created_date) = :filterMonth AND DAY(created_date) = :filterDay';
-        $stmtCount->bindParam(':filterYear', $filterYear, PDO::PARAM_INT);
-        $stmtCount->bindParam(':filterMonth', $filterMonth, PDO::PARAM_INT);
-        $stmtCount->bindParam(':filterDay', $filterDay, PDO::PARAM_INT);
+        $filterCondition = ' WHERE YEAR(publication_date) = :filterYear AND MONTH(publication_date) = :filterMonth';
+        if ($filterDay) {
+            $filterCondition .= ' AND DAY(publication_date) = :filterDay';
+        }
     }
 }
 
@@ -49,34 +43,34 @@ $limit = 10; // Jumlah data per halaman
 $offset = ($page - 1) * $limit; // Offset data
 
 // Query dasar untuk mengambil data koran dari database dengan pengurutan dan filter (jika ada)
-$sql = 'SELECT * FROM newspapers';
-
-// Menambahkan filter tanggal ke query jika dipilih
-if (!empty($filterDay) && !empty($filterMonth) && !empty($filterYear)) {
-    $sql .= ' WHERE YEAR(publication_date) = :filterYear AND MONTH(publication_date) = :filterMonth AND DAY(publication_date) = :filterDay';
-}
-
-$sql .= ' ORDER BY publication_date ' . $sortOrder; // Default pengurutan
-
-// Query untuk menghitung jumlah total data
+$sql = 'SELECT newspapers.*, categories.name AS category_name FROM newspapers LEFT JOIN categories ON newspapers.category_id = categories.id';
 $countSql = 'SELECT COUNT(*) AS total FROM newspapers';
 
-// Menambahkan filter tanggal ke query hitung
-if (!empty($filterDay) && !empty($filterMonth) && !empty($filterYear)) {
-    $countSql .= ' WHERE YEAR(publication_date) = :filterYear AND MONTH(publication_date) = :filterMonth AND DAY(publication_date) = :filterDay';
+// Menambahkan filter tanggal ke query jika dipilih
+if (!empty($filterDay) || !empty($filterMonth) || !empty($filterYear)) {
+    $sql .= $filterCondition;
+    $countSql .= $filterCondition;
 }
+
+$sql .= ' ORDER BY ' . $sortBy . ' ' . $sortOrder; // Default pengurutan
 
 $stmt = $pdo->prepare($sql . ' LIMIT :limit OFFSET :offset');
 $stmtCount = $pdo->prepare($countSql);
 
 // Bind parameter jika ada filter tanggal
-if (!empty($filterDay) && !empty($filterMonth) && !empty($filterYear)) {
-    $stmt->bindParam(':filterYear', $filterYear, PDO::PARAM_INT);
-    $stmt->bindParam(':filterMonth', $filterMonth, PDO::PARAM_INT);
-    $stmt->bindParam(':filterDay', $filterDay, PDO::PARAM_INT);
-    $stmtCount->bindParam(':filterYear', $filterYear, PDO::PARAM_INT);
-    $stmtCount->bindParam(':filterMonth', $filterMonth, PDO::PARAM_INT);
-    $stmtCount->bindParam(':filterDay', $filterDay, PDO::PARAM_INT);
+if (!empty($filterDay) || !empty($filterMonth) || !empty($filterYear)) {
+    if (!empty($filterYear)) {
+        $stmt->bindParam(':filterYear', $filterYear, PDO::PARAM_INT);
+        $stmtCount->bindParam(':filterYear', $filterYear, PDO::PARAM_INT);
+    }
+    if (!empty($filterMonth)) {
+        $stmt->bindParam(':filterMonth', $filterMonth, PDO::PARAM_INT);
+        $stmtCount->bindParam(':filterMonth', $filterMonth, PDO::PARAM_INT);
+    }
+    if (!empty($filterDay)) {
+        $stmt->bindParam(':filterDay', $filterDay, PDO::PARAM_INT);
+        $stmtCount->bindParam(':filterDay', $filterDay, PDO::PARAM_INT);
+    }
 }
 
 $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
@@ -90,7 +84,6 @@ $totalResults = $stmtCount->fetchColumn();
 
 // Total halaman
 $totalPages = ceil($totalResults / $limit);
-
 ?>
 
 <!DOCTYPE html>
@@ -175,67 +168,44 @@ $totalPages = ceil($totalResults / $limit);
                                         value="<?php echo htmlspecialchars($filterYear); ?>"
                                         class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                 </div>
-                                <div class="flex items-end">
-                                    <button type="submit"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-block">Terapkan
-                                        Filter</button>
-                                </div>
+                            </div>
+                            <!-- Tombol filter -->
+                            <div class="flex justify-end mt-4">
+                                <button type="submit"
+                                    class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                    Filter
+                                </button>
                             </div>
                         </form>
 
-                        <div class="overflow-x-auto border-b border-gray-200 sm:rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-500">
+                        <!-- Tabel data koran -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
+                                <thead>
                                     <tr>
-                                        <th class="py-2 px-4">
-                                            <span class="text-sm font-bold text-black">No.</span>
-                                        </th>
-                                        <th class="py-2 px-4">
-                                            <span class="text-sm font-bold text-black">Judul Koran</span>
-                                        </th>
-                                        <th class="py-2 px-4">
-                                            <span class="text-sm font-bold text-black">Tanggal Terbit
-                                                <a href="?sort=publication_date&order=<?php echo $sortOrder === 'ASC' ? 'desc' : 'asc'; ?>"
-                                                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-1 px-2 rounded inline-block">
-                                                    <?php echo $sortOrder === 'ASC' ? '↑' : '↓'; ?>
-                                                </a>
-                                            </span>
-                                        </th>
-                                        <th class="py-2 px-4">
-                                            <span class="text-sm font-bold text-black">Kategori</span>
-                                        </th>
-                                        <th class="py-2 px-4">
-                                            <span class="text-sm font-bold text-black">Tipe</span>
-                                        </th>
-                                        <th class="py-2 px-4">
-                                            <span class="text-sm font-bold text-black">Aksi</span>
-                                        </th>
+                                        <th class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">Judul</th>
+                                        <th class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">Kategori</th>
+                                        <th class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">Tema</th>
+                                        <th class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">Tanggal Terbit</th>
+                                        <th class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php foreach ($newspapers as $index => $newspaper) : ?>
-                                    <tr class="<?php echo $index % 2 == 0 ? 'bg-gray-300' : 'bg-gray-400'; ?>">
-                                        <td class="py-2 px-4 whitespace-nowrap">
-                                            <span
-                                                class="text-sm text-gray-900"><?php echo $index + 1 + ($page - 1) * $limit; ?></span>
+                                <tbody>
+                                    <?php foreach ($newspapers as $newspaper): ?>
+                                    <tr>
+                                        <td class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">
+                                            <?php echo htmlspecialchars($newspaper['title']); ?>
                                         </td>
-                                        <td class="py-2 px-4 whitespace-nowrap">
-                                            <span
-                                                class="text-sm text-gray-900"><?php echo htmlspecialchars($newspaper['title']); ?></span>
+                                        <td class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">
+                                            <?php echo htmlspecialchars($newspaper['category_name']); ?>
                                         </td>
-                                        <td class="py-2 px-4 whitespace-nowrap">
-                                            <span
-                                                class="text-sm text-gray-900"><?php echo date('d-m-Y', strtotime($newspaper['publication_date'])); ?></span>
+                                        <td class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">
+                                            <?php echo htmlspecialchars($newspaper['category']); ?>
                                         </td>
-                                        <td class="py-2 px-4 whitespace-nowrap">
-                                            <span
-                                                class="text-sm text-gray-900"><?php echo htmlspecialchars($newspaper['category']); ?></span>
+                                        <td class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">
+                                            <?php echo htmlspecialchars($newspaper['publication_date']); ?>
                                         </td>
-                                        <td class="py-2 px-4 whitespace-nowrap">
-                                            <span
-                                                class="text-sm text-gray-900"><?php echo htmlspecialchars($newspaper['newspaper_type']); ?></span>
-                                        </td>
-                                        <td class="py-2 px-4 whitespace-nowrap">
+                                        <td class="py-2 px-4 border-b border-gray-300 dark:border-gray-700">
                                             <a href="view_newspaper.php?id=<?php echo $newspaper['id']; ?>"
                                                 class="text-emerald-600 hover:text-emerald-700 mr-2">View</a>
                                             <a href="edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
@@ -246,73 +216,24 @@ $totalPages = ceil($totalResults / $limit);
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
-                                    <?php if (empty($newspapers)) : ?>
-                                    <tr>
-                                        <td colspan="5" class="py-4 px-6 text-center text-gray-500">No newspapers found.
-                                        </td>
-                                    </tr>
-                                    <?php endif; ?>
                                 </tbody>
                             </table>
-
                         </div>
 
-                        <?php if ($totalPages > 1) : ?>
+                        <!-- Pagination -->
                         <div class="flex justify-center mt-4">
-                            <nav class="flex space-x-2" aria-label="Pagination">
-                                <?php if ($page > 1) : ?>
-                                <a href="?page=<?php echo $page - 1; ?>"
-                                    class="py-2 px-3 bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-lg">Previous</a>
-                                <?php endif; ?>
-                                <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
-                                <a href="?page=<?php echo $i; ?>"
-                                    class="<?php echo $i === $page ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'; ?> py-2 px-3 rounded-lg"><?php echo $i; ?></a>
-                                <?php endfor; ?>
-                                <?php if ($page < $totalPages) : ?>
-                                <a href="?page=<?php echo $page + 1; ?>"
-                                    class="py-2 px-3 bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-lg">Next</a>
-                                <?php endif; ?>
-                            </nav>
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <a href="?page=<?php echo $i; ?>"
+                                class="px-3 py-2 mx-1 text-white bg-blue-500 rounded-lg hover:bg-blue-700 <?php echo ($i === $page) ? 'bg-blue-700' : ''; ?>">
+                                <?php echo $i; ?>
+                            </a>
+                            <?php endfor; ?>
                         </div>
-                        <?php endif; ?>
                     </div>
                 </main>
             </div>
         </div>
-
-
-        <!-- Tabel untuk menampilkan data koran -->
-
-        <!-- Pagination -->
     </div>
-    </div>
-
-    <script src="https://kit.fontawesome.com/8e23404ed8.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
-    <script src="../js/app.js"></script>
-    <script>
-    function confirmDelete(newspaperId) {
-        Swal.fire({
-            title: 'Delete Newspaper',
-            text: 'Are you sure you want to delete this newspaper?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Redirect to delete script with newspaperId
-                window.location.href = 'delete_newspaper.php?id=' + newspaperId;
-            }
-        });
-        // Prevent the default action of the link
-        return false;
-    }
-    </script>
-
-    <script src="sweetalert2.all.min.js"></script>
-
 </body>
 
 </html>

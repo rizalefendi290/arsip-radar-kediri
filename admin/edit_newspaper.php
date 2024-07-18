@@ -13,7 +13,7 @@ if (!$id) {
     exit;
 }
 
-$stmt = $pdo->prepare('SELECT * FROM newspapers WHERE id = ?');
+$stmt = $pdo->prepare('SELECT newspapers.*, categories.name AS category_name FROM newspapers LEFT JOIN categories ON newspapers.category_id = categories.id WHERE newspapers.id = ?');
 $stmt->execute([$id]);
 $newspaper = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -21,15 +21,18 @@ if (!$newspaper) {
     header('Location: admin_dashboard.php');
     exit;
 }
+$categoriesStmt = $pdo->query('SELECT id, name FROM categories');
+$categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'];
     $publication_date = $_POST['publication_date'];
-    $category = $_POST['category'];
+    $category_id = $_POST['category_id'];
     $newspaper_type = $_POST['newspaper_type'];
-    
+
     $fileUploaded = false;
     $fileUploadDir = '../uploads/';
     $fileNewPath = $newspaper['pdf_file'];
@@ -52,10 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $stmt = $pdo->prepare('UPDATE newspapers SET title = ?, publication_date = ?, category = ?, newspaper_type = ?, pdf_file = ? WHERE id = ?');
-        $params = [$title, $publication_date, $category, $newspaper_type, $fileNewPath, $id];
+        $stmt = $pdo->prepare('UPDATE newspapers SET title = ?, publication_date = ?, category_id = ?, newspaper_type = ?, pdf_file = ? WHERE id = ?');
+        $params = [$title, $publication_date, $category_id, $newspaper_type, $fileNewPath, $id];
         if (!$fileUploaded) {
-            $params = [$title, $publication_date, $category, $newspaper_type, $newspaper['pdf_file'], $id];
+            $params = [$title, $publication_date, $category_id, $newspaper_type, $newspaper['pdf_file'], $id];
         }
         if ($stmt->execute($params)) {
             $_SESSION['edit_success'] = true;
@@ -66,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 
 if (isset($_SESSION['role'])) {
     $role = $_SESSION['role'];
@@ -116,14 +120,18 @@ if (isset($_SESSION['role'])) {
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                             </div>
                             <div class="mb-4">
-                                <label for="category" class="block text-gray-700 text-sm font-bold mb-2">Kategori:</label>
+                                <label for="category" class="block text-gray-700 text-sm font-bold mb-2">Tema:</label>
                                 <input type="text" id="category" name="category" value="<?php echo htmlspecialchars($newspaper['category']); ?>"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            </div>
-                            <div class="mb-4">
-                                <label for="newspaper_type" class="block text-gray-700 text-sm font-bold mb-2">Tipe Koran:</label>
-                                <input type="text" id="newspaper_type" name="newspaper_type" value="<?php echo htmlspecialchars($newspaper['newspaper_type']); ?>"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            </div>                            <div class="mb-4">
+                                <label for="category_id" class="block text-gray-700 text-sm font-bold mb-2">Kategori:</label>
+                                <select id="category_id" name="category_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <?php foreach ($categories as $category): ?>
+                                    <option value="<?php echo $category['id']; ?>" <?php echo ($category['id'] == $newspaper['category_id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($category['name']); ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                             <div class="mb-4">
                                 <label for="file" class="block text-gray-700 text-sm font-bold mb-2">File PDF:</label>
