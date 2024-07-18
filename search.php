@@ -20,7 +20,7 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $itemsPerPage;
 
 // Kolom yang akan dicari
-$searchColumns = ['title', 'category', 'newspaper_type', 'publication_date'];
+$searchColumns = ['title', 'publication_date', 'category', 'c.name'];
 
 // Bangun query pencarian dinamis
 $whereClauses = [];
@@ -32,14 +32,29 @@ foreach ($searchColumns as $column) {
 }
 $whereSql = implode(' OR ', $whereClauses);
 
+// Query untuk ambil kategori
+$stmtCategories = $pdo->query("SELECT * FROM categories");
+$categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
+
 // Hitung total item
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM newspapers WHERE $whereSql");
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM newspapers n 
+    LEFT JOIN categories c ON n.category_id = c.id 
+    WHERE $whereSql
+");
 $stmt->execute($params);
 $totalItems = $stmt->fetchColumn();
 $totalPages = ceil($totalItems / $itemsPerPage);
 
 // Ambil data koran yang sesuai dengan query pencarian
-$stmt = $pdo->prepare("SELECT * FROM newspapers WHERE $whereSql LIMIT ? OFFSET ?");
+$stmt = $pdo->prepare("
+    SELECT n.*, c.name as category_name 
+    FROM newspapers n 
+    LEFT JOIN categories c ON n.category_id = c.id 
+    WHERE $whereSql 
+    LIMIT ? OFFSET ?
+");
 $params[] = $itemsPerPage;
 $params[] = $offset;
 $stmt->execute($params);
@@ -177,7 +192,7 @@ if (isset($_SESSION['role'])) {
                                     </td>
                                     <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
                                         <div class="text-sm leading-5 text-gray-900">
-                                            <?php echo htmlspecialchars($newspaper['newspaper_type']); ?>
+                                            <?php echo htmlspecialchars($newspaper['category_name']); ?>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
@@ -192,7 +207,8 @@ if (isset($_SESSION['role'])) {
                                         <a href="admin/edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
                                             class="text-green-500 hover:text-green-700 ml-2">Edit</a><a
                                             href="delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                                            class="text-red-500 hover:text-red-700 ml-2" onclick="event.preventDefault(); 
+                                            class="text-red-500 hover:text-red-700 ml-2"
+                                            onclick="event.preventDefault(); 
              Swal.fire({
                  title: 'Apakah Anda yakin?',
                  text: 'Anda tidak dapat mengembalikan koran ini setelah dihapus!',
