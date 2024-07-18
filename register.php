@@ -10,22 +10,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']); // Menambahkan pengambilan input name
     $password = $_POST['password'];
     $passwordConfirm = $_POST['passwordConfirm'];
-    $role = 'user';  // Get role from form input
+    $role = 'user';  // Default role
 
-    // Validasi username
+    //validasi username
     if (empty($username)) {
         $errors[] = 'Username is required';
     } elseif (strlen($username) < 6 || strlen($username) > 20) {
-        $errors[] = 'Username must be between 6 and 20 characters';
+        $errors[] = 'Username harus berisi 6-20 kata';
     } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
-        $errors[] = 'Username can only contain letters, numbers, and underscores';
+        $errors[] = 'Username hanya boleh berisi huruf, angka, dan garis bawah';
+    } else {
+        // Cek apakah username sudah ada
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = ?');
+        $stmt->execute([$username]);
+        if ($stmt->fetchColumn() > 0) {
+            $errors[] = 'Username sudah terdaftar';
+        }
     }
-
     // Validasi email
     if (empty($email)) {
         $errors[] = 'Email is required';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Invalid email format';
+    } else {
+        // Cek apakah email sudah ada
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE email = ?');
+        $stmt->execute([$email]);
+        if ($stmt->fetchColumn() > 0) {
+            $errors[] = 'Email sudah terdaftar';
+        }
     }
 
     // Validasi nama
@@ -37,12 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($password)) {
         $errors[] = 'Password is required';
     } elseif (strlen($password) < 8) {
-        $errors[] = 'Password must be at least 8 characters long';
+        $errors[] = 'Kata sandi harus terdiri dari minimal 8 karakter';
     }
 
     // Validasi konfirmasi password
     if ($password !== $passwordConfirm) {
-        $errors[] = 'Passwords do not match';
+        $errors[] = 'Passwords tidak sesuai';
     }
 
     // Validasi role
@@ -57,9 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Insert user into database
         $stmt = $pdo->prepare('INSERT INTO users (username, email, name, password, role) VALUES (?, ?, ?, ?, ?)');
         if ($stmt->execute([$username, $email, $name, $hashedPassword, $role])) {
-            echo 'User registered successfully';
+            $success = true;
         } else {
-            echo 'Error registering user';
+            $errors[] = 'Error registering user';
         }
     }
 }
@@ -74,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Register</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
     body {
         background-image: url('assets/image/background.jpg');
@@ -85,9 +99,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
+    <?php if (isset($success) && $success): ?>
+    <script>
+    Swal.fire({
+        title: 'Registrasi Berhasil',
+        text: 'User telah berhasil terdaftar.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'login.php';
+        }
+    });
+    </script>
+    <?php elseif (!empty($errors)): ?>
+    <script>
+    Swal.fire({
+        title: 'Error',
+        html: '<?php echo implode("<br>", array_map("htmlspecialchars", $errors)); ?>',
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+    </script>
+    <?php endif; ?>
+
+
     <section>
         <div class="bg-transparent h-screen flex flex-col items-center justify-center">
-            <div class="max-w-md mx-auto my-3   0 bg-white p-8 rounded shadow-md bg-opacity-70">
+            <div class="max-w-md mx-auto my-3 bg-white p-8 rounded shadow-md bg-opacity-70">
                 <img src="assets/image/logo3.png" alt="" class="mt-0">
                 <h2 class="text-2xl mb-4 text-center">Register</h2>
                 <?php if (!empty($errors)): ?>
@@ -135,7 +174,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Register
                     </button>
                 </form>
-                <p class="mt-2 text-center">Sudah mempunyai akun? <a href="login.php" class="text-blue-900 hover:text-blue-500">Login Sekarang</a></p>
+                <p class="mt-2 text-center">Sudah mempunyai akun? <a href="login.php"
+                        class="text-blue-900 hover:text-blue-500">Login Sekarang</a></p>
             </div>
         </div>
     </section>

@@ -30,8 +30,8 @@ $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'];
     $publication_date = $_POST['publication_date'];
+    $category = $_POST['category'];
     $category_id = $_POST['category_id'];
-    $newspaper_type = $_POST['newspaper_type'];
 
     $fileUploaded = false;
     $fileUploadDir = '../uploads/';
@@ -55,10 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $stmt = $pdo->prepare('UPDATE newspapers SET title = ?, publication_date = ?, category_id = ?, newspaper_type = ?, pdf_file = ? WHERE id = ?');
-        $params = [$title, $publication_date, $category_id, $newspaper_type, $fileNewPath, $id];
+        $stmt = $pdo->prepare('UPDATE newspapers SET title = ?, publication_date = ?, category = ?, category_id = ?, newspaper_type = ?, pdf_file = ? WHERE id = ?');
+        $params = [$title, $publication_date, $category, $category_id, $newspaper_type, $fileNewPath, $id];
         if (!$fileUploaded) {
-            $params = [$title, $publication_date, $category_id, $newspaper_type, $newspaper['pdf_file'], $id];
+            $params = [$title, $publication_date, $category, $category_id, $newspaper_type, $newspaper['pdf_file'], $id];
         }
         if ($stmt->execute($params)) {
             $_SESSION['edit_success'] = true;

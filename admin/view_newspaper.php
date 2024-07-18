@@ -7,7 +7,7 @@ require '../config.php';
 // Ambil ID koran dari query parameter
 $id = $_GET['id'] ?? null;
 if (!$id) {
-    header('Location: user_dashboard.php'); // Redirect ke halaman user dashboard jika tidak ada ID
+    header('Location: index.php'); // Redirect ke halaman user dashboard jika tidak ada ID
     exit;
 }
 
@@ -17,9 +17,13 @@ $stmt->execute([$id]);
 $newspaper = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$newspaper) {
-    header('Location: user_dashboard.php'); // Redirect ke halaman user dashboard jika koran tidak ditemukan
+    header('Location: index.php'); // Redirect ke halaman user dashboard jika koran tidak ditemukan
     exit;
 }
+$category_id = $newspaper['category_id'];
+$category_stmt = $pdo->prepare('SELECT name FROM categories WHERE id = ?');
+$category_stmt->execute([$category_id]);
+$category = $category_stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -187,7 +191,7 @@ if (!$newspaper) {
             <div class="p-4">
                 <h2 class="text-xl font-bold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
                 <p class="text-black text-2xl mb-2">Kategori :
-                    <?php echo htmlspecialchars($newspaper['newspaper_type']); ?></p>
+                    <?php echo htmlspecialchars($category['name']); ?></p>
                 <p class="text-black text-2xl mb-2">Tanggal Terbit:
                     <?php echo htmlspecialchars($newspaper['publication_date']); ?></p>
                 <p class="text-black text-xl mb-2">Tema: <?php echo htmlspecialchars($newspaper['category']); ?></p>
