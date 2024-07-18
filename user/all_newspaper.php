@@ -14,7 +14,7 @@ $newspaperType = isset($_GET['newspaper_type']) ? $_GET['newspaper_type'] : '';
 
 // Hitung total item
 if ($newspaperType) {
-    $stmt = $pdo->prepare('SELECT COUNT(*) FROM newspapers WHERE newspaper_type = ?');
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM newspapers WHERE category_id = ?');
     $stmt->execute([$newspaperType]);
 } else {
     $stmt = $pdo->prepare('SELECT COUNT(*) FROM newspapers');
@@ -25,7 +25,7 @@ $totalPages = ceil($totalItems / $itemsPerPage);
 
 // Ambil data koran
 if ($newspaperType) {
-    $stmt = $pdo->prepare('SELECT * FROM newspapers WHERE newspaper_type = ? LIMIT ? OFFSET ?');
+    $stmt = $pdo->prepare('SELECT * FROM newspapers WHERE category_id = ? LIMIT ? OFFSET ?');
     $stmt->execute([$newspaperType, $itemsPerPage, $offset]);
 } else {
     $stmt = $pdo->prepare('SELECT * FROM newspapers LIMIT ? OFFSET ?');
@@ -38,7 +38,11 @@ if (isset($_SESSION['role'])) {
 } else {
     $role = 'user'; // Default jika tidak ada role yang ditentukan
 }
+$query = "SELECT id, name FROM categories";
+$stmt = $pdo->query($query);
+$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -48,9 +52,37 @@ if (isset($_SESSION['role'])) {
     <title>Daftar Koran</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="sweetalert2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body class="bg-gray-100">
+    <script>
+    <?php if ($deleteSuccess): ?>
+    Swal.fire({
+        title: 'Success',
+        text: 'Koran berhasil dihapus.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'all_newspaper.php';
+        }
+    });
+    <?php else: ?>
+    Swal.fire({
+        title: 'Error',
+        text: 'Gagal menghapus koran.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'all_newspaper.php';
+        }
+    });
+    <?php endif; ?>
+    </script>
     <nav class="bg-white border-gray-200 dark:bg-gray-900">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="index.php" class="flex items-center space-x-3 rtl:space-x-reverse">
@@ -174,16 +206,18 @@ if (isset($_SESSION['role'])) {
                         <select name="newspaper_type" id="newspaper_type"
                             class="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring focus:ring-blue-300 focus:outline-none">
                             <option value="">Semua Tipe</option>
-                            <option value="jurnal" <?php if ($newspaperType == 'jurnal') echo 'selected'; ?>>Jurnal
+                            <?php foreach ($categories as $category): ?>
+                            <option value="<?= htmlspecialchars($category['id']) ?>"
+                                <?php if ($newspaperType == $category['id']) echo 'selected'; ?>>
+                                <?= htmlspecialchars($category['name']) ?>
                             </option>
-                            <option value="koran" <?php if ($newspaperType == 'koran') echo 'selected'; ?>>Koran
-                            </option>
-                            <option value="artikel" <?php if ($newspaperType == 'artikel') echo 'selected'; ?>>Artikel
-                            </option>
+                            <?php endforeach; ?>
                         </select>
                         <button type="submit"
-                            class="ml-2 px-4 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600">Filter</button>
+                            class="ml-2 px-4 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600">Filter
+                        </button>
                     </form>
+
                 </div>
             </nav>
         </div>
@@ -214,10 +248,10 @@ if (isset($_SESSION['role'])) {
                                 Tanggal Terbit</th>
                             <th
                                 class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
-                                Tipe</th>
+                                Kategori</th>
                             <th
                                 class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
-                                Kategori</th>
+                                Tema</th>
                             <th
                                 class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
                                 Aksi</th>
@@ -225,13 +259,21 @@ if (isset($_SESSION['role'])) {
                     </thead>
                     <tbody class="bg-white">
                         <?php foreach ($newspapers as $newspaper): ?>
+                        <?php
+                         // Fetch categories associated with this newspaper
+                        $stmt = $pdo->prepare('SELECT name FROM categories WHERE id = ?');
+                        $stmt->execute([$newspaper['category_id']]);
+                        $category = $stmt->fetch(PDO::FETCH_ASSOC);
+                        ?>
                         <tr>
                             <td class="px-6 py-4 border-b border-gray-300">
                                 <?php echo htmlspecialchars($newspaper['title']); ?></td>
                             <td class="px-6 py-4 border-b border-gray-300">
                                 <?php echo htmlspecialchars($newspaper['publication_date']); ?></td>
+
                             <td class="px-6 py-4 border-b border-gray-300">
-                                <?php echo htmlspecialchars($newspaper['newspaper_type']); ?></td>
+                                <?php echo htmlspecialchars($category['name']); ?>
+                            </td>
                             <td class="px-6 py-4 border-b border-gray-300">
                                 <?php echo htmlspecialchars($newspaper['category']); ?></td>
                             <td class="px-6 py-4 border-b border-gray-300">
@@ -240,9 +282,9 @@ if (isset($_SESSION['role'])) {
                                 <?php if ($role === 'admin'): ?>
                                 <a href="../admin/edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
                                     class="text-green-500 hover:text-green-700 ml-2">Edit</a>
-                                <a href="../delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
+                                <a href="delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
                                     class="text-red-500 hover:text-red-700 ml-2"
-                                    onclick="return confirm('Apakah Anda yakin ingin menghapus koran ini?');">Hapus</a>
+                                    onclick="return confirmDelete(<?php echo $newspaper['id']; ?>);">Hapus</a>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -327,7 +369,7 @@ if (isset($_SESSION['role'])) {
     <script>
     const role = "<?php echo $role; ?>";
     </script>
-        <script>
+    <script>
     function confirmDelete(newspaperId) {
         Swal.fire({
             title: 'Delete Newspaper',

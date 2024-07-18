@@ -21,6 +21,11 @@ if (!$newspaper) {
     exit;
 }
 
+$category_id = $newspaper['category_id'];
+$category_stmt = $pdo->prepare('SELECT name FROM categories WHERE id = ?');
+$category_stmt->execute([$category_id]);
+$category = $category_stmt->fetch(PDO::FETCH_ASSOC);
+
 if (isset($_SESSION['role'])) {
     $role = $_SESSION['role'];
 } else {
@@ -190,11 +195,11 @@ if (isset($_SESSION['role'])) {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="p-4">
                 <h2 class="text-xl font-bold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
-                <p class="text-black text-2xl mb-2">Tipe : 
-                    <?php echo htmlspecialchars($newspaper['newspaper_type']); ?></p>
+                <p class="text-black text-2xl mb-2">Kategori : 
+                    <?php echo htmlspecialchars($category['name']); ?></p>
                 <p class="text-black text-2xl mb-2">Tanggal Terbit:
                     <?php echo htmlspecialchars($newspaper['publication_date']); ?></p>
-                <p class="text-black text-xl mb-2">Kategori: <?php echo htmlspecialchars($newspaper['category']); ?></p>
+                <p class="text-black text-xl mb-2">Tema: <?php echo htmlspecialchars($newspaper['category']); ?></p>
             </div>
             <div class="p-4">
                 <object data="../uploads/<?php echo htmlspecialchars($newspaper['pdf_file']); ?>" type="application/pdf"
