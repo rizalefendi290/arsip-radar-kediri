@@ -36,6 +36,17 @@ $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <style>
+        .pdf-viewer {
+            overflow: auto;
+            max-height: 80vh; /* Ensure PDF viewer doesn't overflow */
+        }
+        @media (max-width: 768px) {
+            .pdf-viewer canvas {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100">
@@ -187,23 +198,21 @@ $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
                 </div>
             </form>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4">
-                <h2 class="text-xl font-bold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
-                <p class="text-black text-2xl mb-2">Kategori :
-                    <?php echo htmlspecialchars($category['name']); ?></p>
-                <p class="text-black text-2xl mb-2">Tanggal Terbit:
-                    <?php echo htmlspecialchars($newspaper['publication_date']); ?></p>
-                <p class="text-black text-xl mb-2">Tema: <?php echo htmlspecialchars($newspaper['category']); ?></p>
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
+            <div class="mb-4">
+                <span class="text-gray-600">Kategori:</span>
+                <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($category['name']); ?></span>
             </div>
-            <div class="p-4">
-                <object data="../uploads/<?php echo htmlspecialchars($newspaper['pdf_file']); ?>" type="application/pdf"
-                    width="100%" height="800px">
-                    <p class="text-black">Maaf, browser Anda tidak mendukung penampilan PDF. Silakan <a
-                            href="../uploads/<?php echo htmlspecialchars($newspaper['pdf_file']); ?>">unduh dokumen</a>
-                        untuk melihatnya.</p>
-                </object>
+            <div class="mb-4">
+                <span class="text-gray-600">Tanggal Terbit:</span>
+                <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['publication_date']); ?></span>
             </div>
+            <div class="mb-4">
+                <span class="text-gray-600">Tema:</span>
+                <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['category']); ?></span>
+            </div>
+            <div class="pdf-viewer bg-gray-200 p-4 rounded-lg" id="pdf-viewer"></div>
         </div>
     </main>
     <!-- Footer (opsional) -->
@@ -212,6 +221,29 @@ require '../components/footer.php'
 ?>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
     <script src="../js/app.js"></script>
+    <script>
+        var url = '../uploads/<?php echo $newspaper['pdf_file']; ?>';
+        var pdfViewer = document.getElementById('pdf-viewer');
+
+        pdfjsLib.getDocument(url).promise.then(function(pdfDoc) {
+            for (var pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                pdfDoc.getPage(pageNum).then(function(page) {
+                    var viewport = page.getViewport({ scale: 1.5 });
+                    var canvas = document.createElement('canvas');
+                    var context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    pdfViewer.appendChild(canvas);
+
+                    var renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

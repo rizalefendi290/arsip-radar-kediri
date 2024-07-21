@@ -81,6 +81,8 @@ $totalPages = ceil($totalResults / $limit);
 $stmtCategories = $pdo->prepare("SELECT * FROM categories");
 $stmtCategories->execute();
 $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
+//search
+$searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -105,7 +107,14 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
                     <form class="max-w-md mx-auto mb-5" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>"
                         method="POST">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Input untuk hari -->
+                            <!-- search -->
+                            <div class="col-span-2">
+                                <label for="search_title" class="block text-sm font-medium text-gray-700">Cari Judul
+                                    Koran:</label>
+                                <input type="text" id="search_title" name="search_title"
+                                    value="<?php echo htmlspecialchars($searchTitle); ?>"
+                                    class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
                             <!-- Input untuk bulan -->
                             <div>
                                 <label for="filter_month" class="block text-sm font-medium text-gray-700">Bulan:</label>
