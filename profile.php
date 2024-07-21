@@ -17,6 +17,7 @@ $stmt->execute(['username' => $username]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Jika form disubmit, proses pembaruan data pengguna
+$success = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newUsername = $_POST['username'] ?? '';
     $newName = $_POST['name'] ?? '';
@@ -45,8 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute(['newUsername' => $newUsername, 'newName' => $newName, 'newEmail' => $newEmail, 'username' => $username]);
         }
         $_SESSION['username'] = $newUsername;
-        header('Location: profile.php');
-        exit;
+        $_SESSION['name'] = $newName;
+        $success = true;
     }
 }
 
@@ -56,7 +57,6 @@ if (isset($_SESSION['role'])) {
     $role = 'user'; // Default jika tidak ada role yang ditentukan
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -68,11 +68,12 @@ if (isset($_SESSION['role'])) {
     <link rel="stylesheet" href="path/to/your/tailwind.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-gray-100">
 <?php
-require 'components/header.php'
+require 'components/header.php';
 ?>
     <main>
     <div class="container mx-auto py-4 px-4">
@@ -107,13 +108,24 @@ require 'components/header.php'
             <div class="bg-white p-6 rounded shadow-md max-w-lg mx-auto">
                 <h1 class="text-2xl font-bold mb-6 text-center">Edit Profile</h1>
                 <?php if (!empty($errors)): ?>
-                    <div class="bg-red-100 text-red-700 p-4 mb-4 rounded">
-                        <ul>
-                            <?php foreach ($errors as $error): ?>
-                                <li><?php echo htmlspecialchars($error); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
+                    <script>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: '<ul><?php foreach ($errors as $error) { echo "<li>" . htmlspecialchars($error) . "</li>"; } ?></ul>'
+                        });
+                    </script>
+                <?php endif; ?>
+                <?php if ($success): ?>
+                    <script>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: 'Perubahan berhasil disimpan!'
+                        }).then(function() {
+                            window.location = 'profile.php';
+                        });
+                    </script>
                 <?php endif; ?>
                 <form action="profile.php" method="POST">
                     <div class="mb-4">
@@ -143,7 +155,7 @@ require 'components/header.php'
 
     </main>
 <?php
-require 'components/footer.php'
+require 'components/footer.php';
 ?>
 <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
 <script src="js/app.js"></script>
