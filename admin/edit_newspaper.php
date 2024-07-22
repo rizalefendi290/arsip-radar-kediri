@@ -98,36 +98,47 @@ if (isset($_SESSION['role'])) {
                 <div class="flex-1 p-4">
                     <header class="bg-white shadow mb-4">
                         <div class="container mx-auto py-4 px-4 flex justify-between">
-                            <h1 class="text-2xl font-bold">Edit Koran - <?php echo htmlspecialchars($newspaper['title']); ?></h1>
+                            <h1 class="text-2xl font-bold">Edit Koran -
+                                <?php echo htmlspecialchars($newspaper['title']); ?></h1>
                         </div>
                     </header>
                     <div class="bg-white shadow-md rounded-lg p-4">
                         <?php if (!empty($errors)): ?>
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded relative" role="alert">
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded relative"
+                            role="alert">
                             <strong class="font-bold">Terjadi kesalahan!</strong>
                             <span class="block sm:inline"><?php echo implode('<br>', $errors); ?></span>
                         </div>
                         <?php endif; ?>
-                        <form action="edit_newspaper.php?id=<?php echo $id; ?>" method="POST" enctype="multipart/form-data">
+                        <form action="edit_newspaper.php?id=<?php echo $id; ?>" method="POST"
+                            enctype="multipart/form-data">
                             <div class="mb-4">
                                 <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Judul:</label>
-                                <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($newspaper['title']); ?>"
+                                <input type="text" id="title" name="title"
+                                    value="<?php echo htmlspecialchars($newspaper['title']); ?>"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                             </div>
                             <div class="mb-4">
-                                <label for="publication_date" class="block text-gray-700 text-sm font-bold mb-2">Tanggal Terbit:</label>
-                                <input type="date" id="publication_date" name="publication_date" value="<?php echo htmlspecialchars($newspaper['publication_date']); ?>"
+                                <label for="publication_date" class="block text-gray-700 text-sm font-bold mb-2">Tanggal
+                                    Terbit:</label>
+                                <input type="date" id="publication_date" name="publication_date"
+                                    value="<?php echo htmlspecialchars($newspaper['publication_date']); ?>"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                             </div>
                             <div class="mb-4">
                                 <label for="category" class="block text-gray-700 text-sm font-bold mb-2">Tema:</label>
-                                <input type="text" id="category" name="category" value="<?php echo htmlspecialchars($newspaper['category']); ?>"
+                                <input type="text" id="category" name="category"
+                                    value="<?php echo htmlspecialchars($newspaper['category']); ?>"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            </div>                            <div class="mb-4">
-                                <label for="category_id" class="block text-gray-700 text-sm font-bold mb-2">Kategori:</label>
-                                <select id="category_id" name="category_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            </div>
+                            <div class="mb-4">
+                                <label for="category_id"
+                                    class="block text-gray-700 text-sm font-bold mb-2">Kategori:</label>
+                                <select id="category_id" name="category_id"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                     <?php foreach ($categories as $category): ?>
-                                    <option value="<?php echo $category['id']; ?>" <?php echo ($category['id'] == $newspaper['category_id']) ? 'selected' : ''; ?>>
+                                    <option value="<?php echo $category['id']; ?>"
+                                        <?php echo ($category['id'] == $newspaper['category_id']) ? 'selected' : ''; ?>>
                                         <?php echo htmlspecialchars($category['name']); ?>
                                     </option>
                                     <?php endforeach; ?>

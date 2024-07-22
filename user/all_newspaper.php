@@ -372,13 +372,14 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script>
     function confirmDelete(newspaperId) {
         Swal.fire({
-            title: 'Delete Newspaper',
-            text: 'Are you sure you want to delete this newspaper?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
+            title: 'Anda yakin ingin menghapus data ini?',
+                text: "Tindakan ini tidak dapat diurungkan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
                 // Redirect to delete script with newspaperId

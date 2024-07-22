@@ -9,20 +9,23 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 // Hubungkan ke database atau include config
 require '../config.php';
 
-// Ambil ID koran dari query parameter
+// Ambil ID koran dari query parameter dan validasi
 $id = $_GET['id'] ?? null;
-if (!$id) {
-    header('Location: admin_dashboard.php'); // Redirect ke halaman admin jika tidak ada ID
+if (!$id || !is_numeric($id)) {
+    echo '<script>
+        alert("ID tidak valid.");
+        window.location.href = "admin_dashboard.php";
+    </script>';
     exit;
 }
 
 // Ambil path file PDF sebelum menghapus dari database
-$stmt = $pdo->prepare('SELECT pdf_file FROM newspapers WHERE id = ?');
-$stmt->execute([$id]);
+$stmt = $pdo->prepare('SELECT pdf_file FROM newspapers WHERE id = :id');
+$stmt->execute([':id' => $id]);
 $koran = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$koran) {
-    header('Location: admin_dashboard.php'); // Redirect ke halaman admin jika koran tidak ditemukan
+    header('Location: admin_dashboard.php');
     exit;
 }
 
@@ -41,4 +44,5 @@ if ($stmt->execute([$id])) {
 } else {
     echo "Gagal menghapus koran.";
 }
+
 ?>

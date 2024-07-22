@@ -207,10 +207,9 @@ if (isset($_SESSION['role'])) {
                                         <a href="admin/edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
                                             class="text-green-500 hover:text-green-700 ml-2">Edit</a><a
                                             href="delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                                            class="text-red-500 hover:text-red-700 ml-2"
-                                            onclick="event.preventDefault(); 
+                                            class="text-red-500 hover:text-red-700 ml-2" onclick="event.preventDefault(); 
              Swal.fire({
-                 title: 'Apakah Anda yakin?',
+                 title: 'Apakah Anda yakin menghapus data ini?',
                  text: 'Anda tidak dapat mengembalikan koran ini setelah dihapus!',
                  icon: 'warning',
                  showCancelButton: true,

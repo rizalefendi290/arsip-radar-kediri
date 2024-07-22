@@ -104,41 +104,31 @@ $searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
             <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
                 <h1 class="text-center font-bold text-2xl">Dashboard Admin</h1>
                 <main class="flex-1 p-4 md:px-8 md:py-4 lg:px-12">
-                    <form class="max-w-md mx-auto mb-5" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>"
-                        method="POST">
+                    <form class="max-w-md mx-auto mb-5" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- search -->
                             <div class="col-span-2">
-                                <label for="search_title" class="block text-sm font-medium text-gray-700">Cari Judul
-                                    Koran:</label>
-                                <input type="text" id="search_title" name="search_title"
-                                    value="<?php echo htmlspecialchars($searchTitle); ?>"
-                                    class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <label for="search_title" class="block text-sm font-medium text-gray-700">Cari Judul Koran:</label>
+                                <input type="text" id="search_title" name="search_title" value="<?php echo htmlspecialchars($searchTitle); ?>" class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <!-- Input untuk bulan -->
                             <div>
                                 <label for="filter_month" class="block text-sm font-medium text-gray-700">Bulan:</label>
-                                <input type="number" id="filter_month" name="filter_month" min="1" max="12"
-                                    value="<?php echo htmlspecialchars($filterMonth); ?>"
-                                    class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" id="filter_month" name="filter_month" min="1" max="12" value="<?php echo htmlspecialchars($filterMonth); ?>" class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <!-- Input untuk tahun -->
                             <div>
                                 <label for="filter_year" class="block text-sm font-medium text-gray-700">Tahun:</label>
-                                <input type="number" id="filter_year" name="filter_year" min="1900"
-                                    max="<?php echo date('Y'); ?>" value="<?php echo htmlspecialchars($filterYear); ?>"
-                                    class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" id="filter_year" name="filter_year" min="1900" max="<?php echo date('Y'); ?>" value="<?php echo htmlspecialchars($filterYear); ?>" class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             </div>
                         </div>
                         <!-- Tombol filter -->
                         <div class="flex justify-end mt-4">
-                            <button type="submit"
-                                class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
                                 Filter
                             </button>
                             <?php if (!empty($filterMonth) || !empty($filterYear)): ?>
-                            <a href="admin_dashboard.php"
-                                class="ml-4 px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                            <a href="admin_dashboard.php" class="ml-4 px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400">
                                 Hapus Filter
                             </a>
                             <?php endif; ?>
@@ -173,13 +163,9 @@ $searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
                                         <?php echo htmlspecialchars($newspaper['publication_date']); ?>
                                     </td>
                                     <td class="py-2 px-4 border-b border-gray-300">
-                                        <a href="view_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                                            class="text-blue-500 hover:text-blue-600">View</a>
-                                        <a href="edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                                            class="text-blue-500 hover:text-blue-600 ml-2">Edit</a>
-                                        <a href="delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                                            class="text-red-500 hover:text-red-600 ml-2"
-                                            onclick="return confirm('Are you sure you want to delete this newspaper?')">Delete</a>
+                                        <a href="view_newspaper.php?id=<?php echo $newspaper['id']; ?>" class="text-blue-500 hover:text-blue-600">View</a>
+                                        <a href="edit_newspaper.php?id=<?php echo $newspaper['id']; ?>" class="text-blue-500 hover:text-blue-600 ml-2">Edit</a>
+                                        <a href="#" class="text-red-500 hover:text-red-600 ml-2" onclick="confirmDelete(<?php echo $newspaper['id']; ?>)">Delete</a>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -190,8 +176,7 @@ $searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
                     <!-- Pagination -->
                     <div class="flex justify-center mt-4">
                         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?page=<?php echo $i; ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>"
-                            class="px-3 py-2 mx-1 text-white bg-blue-500 rounded-lg hover:bg-blue-700 <?php echo ($i === $page) ? 'bg-blue-700' : ''; ?>">
+                        <a href="?page=<?php echo $i; ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>" class="px-3 py-2 mx-1 text-white bg-blue-500 rounded-lg hover:bg-blue-700 <?php echo ($i === $page) ? 'bg-blue-700' : ''; ?>">
                             <?php echo $i; ?>
                         </a>
                         <?php endfor; ?>
@@ -200,6 +185,25 @@ $searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
             </div>
         </div>
     </div>
+
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Anda yakin ingin menghapus data ini?',
+                text: "Tindakan ini tidak dapat diurungkan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'delete_newspaper.php?id=' + id;
+                }
+            })
+        }
+    </script>
 </body>
 
 </html>

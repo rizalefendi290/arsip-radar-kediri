@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         if (move_uploaded_file($pdf_file['tmp_name'], $pdf_file_path)) {
             // Insert data ke database
-            $sql = 'INSERT INTO newspapers (title, publication_date, category_id, newspaper_type, pdf_file) VALUES (?, ?, ?, ?, ?)';
+            $sql = 'INSERT INTO newspapers (title, publication_date, category_id, category, pdf_file) VALUES (?, ?, ?, ?, ?)';
             $stmt = $pdo->prepare($sql);
             if ($stmt->execute([$title, $publication_date, $category, $newspaper_type, $pdf_file_path])) {
                 $_SESSION['success'] = 'Data koran berhasil ditambahkan.';
