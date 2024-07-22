@@ -20,7 +20,7 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $itemsPerPage;
 
 // Kolom yang akan dicari
-$searchColumns = ['title', 'category', 'newspaper_type', 'publication_date'];
+$searchColumns = ['title', 'publication_date', 'category', 'c.name'];
 
 // Bangun query pencarian dinamis
 $whereClauses = [];
@@ -32,14 +32,29 @@ foreach ($searchColumns as $column) {
 }
 $whereSql = implode(' OR ', $whereClauses);
 
+// Query untuk ambil kategori
+$stmtCategories = $pdo->query("SELECT * FROM categories");
+$categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
+
 // Hitung total item
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM newspapers WHERE $whereSql");
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM newspapers n 
+    LEFT JOIN categories c ON n.category_id = c.id 
+    WHERE $whereSql
+");
 $stmt->execute($params);
 $totalItems = $stmt->fetchColumn();
 $totalPages = ceil($totalItems / $itemsPerPage);
 
 // Ambil data koran yang sesuai dengan query pencarian
-$stmt = $pdo->prepare("SELECT * FROM newspapers WHERE $whereSql LIMIT ? OFFSET ?");
+$stmt = $pdo->prepare("
+    SELECT n.*, c.name as category_name 
+    FROM newspapers n 
+    LEFT JOIN categories c ON n.category_id = c.id 
+    WHERE $whereSql 
+    LIMIT ? OFFSET ?
+");
 $params[] = $itemsPerPage;
 $params[] = $offset;
 $stmt->execute($params);
@@ -50,6 +65,7 @@ if (isset($_SESSION['role'])) {
 } else {
     $role = 'user'; // Default jika tidak ada role yang ditentukan
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -60,12 +76,12 @@ if (isset($_SESSION['role'])) {
     <title>Hasil Pencarian - <?php echo htmlspecialchars($query); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
+    <!-- Tambahkan Sweet Alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 </head>
 
 <body class="bg-gray-100">
-    <?php
-require 'components/header.php'
-?>
+    <?php require 'components/header.php' ?>
 
     <!-- Header -->
     <header class="shadow">
@@ -152,10 +168,10 @@ require 'components/header.php'
                                         Tanggal Terbit</th>
                                     <th
                                         class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
-                                        Tipe</th>
+                                        Kategori</th>
                                     <th
                                         class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
-                                        Kategori</th>
+                                        Tema</th>
                                     <th
                                         class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
                                         Aksi</th>
@@ -176,7 +192,7 @@ require 'components/header.php'
                                     </td>
                                     <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
                                         <div class="text-sm leading-5 text-gray-900">
-                                            <?php echo htmlspecialchars($newspaper['newspaper_type']); ?>
+                                            <?php echo htmlspecialchars($newspaper['category_name']); ?>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
@@ -185,14 +201,28 @@ require 'components/header.php'
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 border-b border-gray-300">
-                                        <a href="view_newspaper.php?id=<?php echo $newspaper['id']; ?>"
+                                        <a href="user/view_newspaper.php?id=<?php echo $newspaper['id']; ?>"
                                             class="text-blue-500 hover:text-blue-700">Lihat</a>
                                         <?php if ($role === 'admin'): ?>
-                                        <a href="../admin/edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                                            class="text-green-500 hover:text-green-700 ml-2">Edit</a>
-                                        <a href="../delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                                            class="text-red-500 hover:text-red-700 ml-2"
-                                            onclick="return confirm('Apakah Anda yakin ingin menghapus koran ini?');">Hapus</a>
+                                        <a href="admin/edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
+                                            class="text-green-500 hover:text-green-700 ml-2">Edit</a><a
+                                            href="delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
+                                            class="text-red-500 hover:text-red-700 ml-2" onclick="event.preventDefault(); 
+             Swal.fire({
+                 title: 'Apakah Anda yakin menghapus data ini?',
+                 text: 'Anda tidak dapat mengembalikan koran ini setelah dihapus!',
+                 icon: 'warning',
+                 showCancelButton: true,
+                 confirmButtonColor: '#3085d6',
+                 cancelButtonColor: '#d33',
+                 confirmButtonText: 'Ya, hapus saja!',
+                 cancelButtonText: 'Batal'
+             }).then((result) => {
+                 if (result.isConfirmed) {
+                     window.location.href = 'user/delete_newspaper.php?id=<?php echo $newspaper['id']; ?>';
+                 }
+             });">Hapus</a>
+
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -215,12 +245,19 @@ require 'components/header.php'
             <?php endif; ?>
         </div>
         <?php else : ?>
-        <p class="text-center text-gray-600">Tidak ada hasil pencarian untuk "<?php echo htmlspecialchars($query); ?>"
-        </p>
+        <script>
+        // Tampilkan Sweet Alert jika tidak ada hasil
+        Swal.fire({
+            icon: 'info',
+            title: 'Oops...',
+            text: 'Tidak ada hasil pencarian untuk "<?php echo htmlspecialchars($query); ?>"',
+        }).then(function() {
+            window.location.href = 'index.php'; // Redirect ke halaman lain jika perlu
+        });
+        </script>
         <?php endif; ?>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
-    <script src="path/to/flowbite/dist/flowbite.min.js"></script>
 </body>
 
 </html>

@@ -2,6 +2,7 @@
 require 'config.php';
 
 $errors = [];
+$success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier = trim($_POST['identifier']);
@@ -31,13 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['name'] = $user['name'];
             $_SESSION['role'] = $user['role'];
             
-            // Redirect based on user role
-            if ($user['role'] == 'admin') {
-                header('Location: admin/admin_dashboard.php');
-            } else {
-                header('Location: index.php');
-            }
-            exit;
+            $success = true;
+            $role = $user['role'];
         } else {
             $errors[] = 'Invalid username/email or password';
         }
@@ -63,21 +59,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
+    <?php if ($success): ?>
+    <script>
+    Swal.fire({
+        title: 'Login Successful',
+        text: 'Anda Berhasil Login',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            <?php if ($role == 'admin'): ?>
+            window.location.href = 'admin/admin_dashboard.php';
+            <?php else: ?>
+            window.location.href = 'index.php';
+            <?php endif; ?>
+        }
+    });
+    </script>
+    <?php elseif (!empty($errors)): ?>
+    <script>
+    Swal.fire({
+        title: 'Error',
+        text :'Username / Password Salah!',
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+    </script>
+    <?php endif; ?>
+
     <section>
         <div class="bg-transparent h-screen flex flex-col items-center justify-center">
             <div class="p-8 rounded shadow-md max-w-md w-full bg-white bg-opacity-70">
                 <img src="assets/image/logo3.png" alt="" width="400" class="">
                 <h2 class="text-2xl mb-6 text-center fw-bold">Login</h2>
-                <?php if ($errors): ?>
-                <ul class="text-red-500 mb-4">
-                    <?php foreach ($errors as $error): ?>
-                    <li><?php echo htmlspecialchars($error); ?></li>
-                    <?php endforeach; ?>
-                </ul>
-                <?php endif; ?>
                 <form action="login.php" method="POST">
                     <div class="mb-4">
                         <label for="identifier" class="block text-black">Username or Email:</label>
@@ -101,7 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
-
 </body>
 
 </html>
