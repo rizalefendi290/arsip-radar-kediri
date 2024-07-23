@@ -37,15 +37,17 @@ $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <style>
-        .pdf-viewer {
-            overflow: auto;
-            max-height: 80vh; /* Ensure PDF viewer doesn't overflow */
+    .pdf-viewer {
+        overflow: auto;
+        max-height: 80vh;
+        /* Ensure PDF viewer doesn't overflow */
+    }
+
+    @media (max-width: 768px) {
+        .pdf-viewer canvas {
+            width: 100%;
         }
-        @media (max-width: 768px) {
-            .pdf-viewer canvas {
-                width: 100%;
-            }
-        }
+    }
     </style>
 </head>
 
@@ -198,21 +200,25 @@ $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
                 </div>
             </form>
         </div>
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-2xl font-semibold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
-            <div class="mb-4">
-                <span class="text-gray-600">Kategori:</span>
-                <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($category['name']); ?></span>
+        <div class="bg-white shadow-md rounded-lg p-6 flex grid lg:grid-cols-2 gap-2 md:grid-cols-1 mx-auto">
+            <div>
+                <h2 class="text-2xl font-semibold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
+                <div class="mb-4">
+                    <span class="text-gray-600">Kategori:</span>
+                    <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($category['name']); ?></span>
+                </div>
+                <div class="mb-4">
+                    <span class="text-gray-600">Tanggal Terbit:</span>
+                    <span
+                        class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['publication_date']); ?></span>
+                </div>
+                <div class="mb-4">
+                    <span class="text-gray-600">Tema / Isi :</span>
+                    <span
+                        class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['category']); ?></span>
+                </div>
             </div>
-            <div class="mb-4">
-                <span class="text-gray-600">Tanggal Terbit:</span>
-                <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['publication_date']); ?></span>
-            </div>
-            <div class="mb-4">
-                <span class="text-gray-600">Tema / Isi :</span>
-                <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['category']); ?></span>
-            </div>
-            <div class="pdf-viewer bg-gray-200 p-4 rounded-lg" id="pdf-viewer"></div>
+            <div class="pdf-viewer bg-gray-400 p-4 rounded-lg" id="pdf-viewer"></div>
         </div>
     </main>
     <!-- Footer (opsional) -->
@@ -222,27 +228,29 @@ require '../components/footer.php'
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
     <script src="../js/app.js"></script>
     <script>
-        var url = '../uploads/<?php echo $newspaper['pdf_file']; ?>';
-        var pdfViewer = document.getElementById('pdf-viewer');
+    var url = '../uploads/<?php echo $newspaper['pdf_file']; ?>';
+    var pdfViewer = document.getElementById('pdf-viewer');
 
-        pdfjsLib.getDocument(url).promise.then(function(pdfDoc) {
-            for (var pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-                pdfDoc.getPage(pageNum).then(function(page) {
-                    var viewport = page.getViewport({ scale: 1.5 });
-                    var canvas = document.createElement('canvas');
-                    var context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    pdfViewer.appendChild(canvas);
-
-                    var renderContext = {
-                        canvasContext: context,
-                        viewport: viewport
-                    };
-                    page.render(renderContext);
+    pdfjsLib.getDocument(url).promise.then(function(pdfDoc) {
+        for (var pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+            pdfDoc.getPage(pageNum).then(function(page) {
+                var viewport = page.getViewport({
+                    scale: 0.9
                 });
-            }
-        });
+                var canvas = document.createElement('canvas');
+                var context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                pdfViewer.appendChild(canvas);
+
+                var renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+            });
+        }
+    });
     </script>
 </body>
 
