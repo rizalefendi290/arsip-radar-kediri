@@ -142,7 +142,7 @@ $searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
                                 <tr>
                                     <th class="py-2 px-4 border-b border-gray-300">Judul</th>
                                     <th class="py-2 px-4 border-b border-gray-300">Kategori</th>
-                                    <th class="py-2 px-4 border-b border-gray-300">Tema</th>
+                                    <th class="py-2 px-4 border-b border-gray-300">Tema / Isi</th>
                                     <th class="py-2 px-4 border-b border-gray-300">Tanggal Terbit</th>
                                     <th class="py-2 px-4 border-b border-gray-300">Aksi</th>
                                 </tr>

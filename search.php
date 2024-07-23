@@ -171,7 +171,7 @@ if (isset($_SESSION['role'])) {
                                         Kategori</th>
                                     <th
                                         class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
-                                        Tema</th>
+                                        Tema / Isi</th>
                                     <th
                                         class="px-6 py-3 border-b-2 border-gray-300 bg-gray-200 text-left text-xs leading-4 text-gray-600 uppercase tracking-wider">
                                         Aksi</th>

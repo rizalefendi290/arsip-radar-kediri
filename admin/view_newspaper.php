@@ -209,7 +209,7 @@ $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
                 <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['publication_date']); ?></span>
             </div>
             <div class="mb-4">
-                <span class="text-gray-600">Tema:</span>
+                <span class="text-gray-600">Tema / Isi :</span>
                 <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['category']); ?></span>
             </div>
             <div class="pdf-viewer bg-gray-200 p-4 rounded-lg" id="pdf-viewer"></div>
