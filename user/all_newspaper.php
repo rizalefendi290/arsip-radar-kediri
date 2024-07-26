@@ -266,17 +266,17 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         $category = $stmt->fetch(PDO::FETCH_ASSOC);
                         ?>
                         <tr>
-                            <td class="px-6 py-4 border-b border-gray-300">
+                            <td class="px-6 py-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                 <?php echo htmlspecialchars($newspaper['title']); ?></td>
-                            <td class="px-6 py-4 border-b border-gray-300">
+                            <td class="px-6 py-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                 <?php echo htmlspecialchars($newspaper['publication_date']); ?></td>
 
-                            <td class="px-6 py-4 border-b border-gray-300">
+                            <td class="px-6 py-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                 <?php echo htmlspecialchars($category['name']); ?>
                             </td>
-                            <td class="px-6 py-4 border-b border-gray-300">
+                            <td class="px-6 py-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                 <?php echo htmlspecialchars($newspaper['category']); ?></td>
-                            <td class="px-6 py-4 border-b border-gray-300">
+                            <td class="px-6 py-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                 <a href="view_newspaper.php?id=<?php echo $newspaper['id']; ?>"
                                     class="text-blue-500 hover:text-blue-700">Lihat</a>
                                 <?php if ($role === 'admin'): ?>

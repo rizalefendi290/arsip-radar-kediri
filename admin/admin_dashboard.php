@@ -17,29 +17,31 @@ $sortOrder = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
 $filterConditions = [];
 $params = [];
 
-// Memproses filter tanggal jika ada request POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $filterMonth = isset($_POST['filter_month']) ? $_POST['filter_month'] : '';
-    $filterYear = isset($_POST['filter_year']) ? $_POST['filter_year'] : '';
-    $filterCategory = isset($_POST['filter_category']) ? $_POST['filter_category'] : '';
+// Memproses filter tanggal jika ada request POST atau GET
+$filterMonth = isset($_POST['filter_month']) ? $_POST['filter_month'] : (isset($_GET['filter_month']) ? $_GET['filter_month'] : '');
+$filterYear = isset($_POST['filter_year']) ? $_POST['filter_year'] : (isset($_GET['filter_year']) ? $_GET['filter_year'] : '');
+$filterCategory = isset($_POST['filter_category']) ? $_POST['filter_category'] : (isset($_GET['filter_category']) ? $_GET['filter_category'] : '');
+$searchTitle = isset($_POST['search_title']) ? $_POST['search_title'] : (isset($_GET['search_title']) ? $_GET['search_title'] : '');
 
-    $params = [];
+// Validasi input bulan dan tahun
+if (!empty($filterMonth) && $filterMonth >= 1 && $filterMonth <= 12) {
+    $filterConditions[] = ' MONTH(publication_date) = :filterMonth';
+    $params[':filterMonth'] = $filterMonth;
+}
 
-    // Validasi input bulan dan tahun
-    if (!empty($filterMonth) && $filterMonth >= 1 && $filterMonth <= 12) {
-        $filterConditions[] = ' MONTH(publication_date) = :filterMonth';
-        $params[':filterMonth'] = $filterMonth;
-    }
+if (!empty($filterYear) && $filterYear >= 1900 && $filterYear <= date('Y')) {
+    $filterConditions[] = ' YEAR(publication_date) = :filterYear';
+    $params[':filterYear'] = $filterYear;
+}
 
-    if (!empty($filterYear) && $filterYear >= 1900 && $filterYear <= date('Y')) {
-        $filterConditions[] = ' YEAR(publication_date) = :filterYear';
-        $params[':filterYear'] = $filterYear;
-    }
-    if (!empty($filterCategory)) {
-        $filterCondition .= (!empty($filterCondition)) ? ' AND ' : ' WHERE ';
-        $filterCondition .= 'newspapers.category_id = :category_id';
-        $params[':category_id'] = $filterCategory;
-    }
+if (!empty($filterCategory)) {
+    $filterConditions[] = 'newspapers.category_id = :filterCategory';
+    $params[':filterCategory'] = $filterCategory;
+}
+
+if (!empty($searchTerm)) {
+    $filterConditions[] = '(title LIKE :searchTerm OR category_name LIKE :searchTerm OR content LIKE :searchTerm)';
+    $params[':searchTerm'] = '%' . $searchTerm . '%';
 }
 
 // Pagination
@@ -51,19 +53,21 @@ $offset = ($page - 1) * $limit; // Offset data
 $sql = 'SELECT newspapers.*, categories.name AS category_name FROM newspapers LEFT JOIN categories ON newspapers.category_id = categories.id';
 $countSql = 'SELECT COUNT(*) AS total FROM newspapers';
 
-// Menambahkan filter tanggal ke query jika dipilih
+// Menambahkan filter ke query jika dipilih
 if (!empty($filterConditions)) {
     $sql .= ' WHERE ' . implode(' AND ', $filterConditions);
+    $countSql .= ' WHERE ' . implode(' AND ', $filterConditions);
 }
+
 $sql .= ' ORDER BY ' . $sortBy . ' ' . $sortOrder; // Default pengurutan
 
 $stmt = $pdo->prepare($sql . ' LIMIT :limit OFFSET :offset');
-$stmtCount = $pdo->prepare('SELECT COUNT(*) AS total FROM newspapers' . (empty($filterConditions) ? '' : ' WHERE ' . implode(' AND ', $filterConditions)));
+$stmtCount = $pdo->prepare($countSql);
 
-// Bind parameter jika ada filter tanggal
+// Bind parameter jika ada filter
 foreach ($params as $param => &$value) {
-    $stmt->bindParam($param, $value, PDO::PARAM_INT);
-    $stmtCount->bindParam($param, $value, PDO::PARAM_INT);
+    $stmt->bindParam($param, $value, PDO::PARAM_STR);
+    $stmtCount->bindParam($param, $value, PDO::PARAM_STR);
 }
 
 $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
@@ -77,12 +81,12 @@ $totalResults = $stmtCount->fetchColumn();
 
 // Total halaman
 $totalPages = ceil($totalResults / $limit);
+
 // Query untuk mengambil kategori dari database
 $stmtCategories = $pdo->prepare("SELECT * FROM categories");
 $stmtCategories->execute();
 $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
-//search
-$searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
+
 ?>
 
 <!DOCTYPE html>
@@ -121,13 +125,25 @@ $searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
                                 <label for="filter_year" class="block text-sm font-medium text-gray-700">Tahun:</label>
                                 <input type="number" id="filter_year" name="filter_year" min="1900" max="<?php echo date('Y'); ?>" value="<?php echo htmlspecialchars($filterYear); ?>" class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             </div>
+                            <!-- Input untuk kategori -->
+                            <div class="col-span-2">
+                                <label for="filter_category" class="block text-sm font-medium text-gray-700">Kategori:</label>
+                                <select id="filter_category" name="filter_category" class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Pilih Kategori</option>
+                                    <?php foreach ($categories as $category): ?>
+                                    <option value="<?php echo $category['id']; ?>" <?php echo ($filterCategory == $category['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($category['name']); ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
                         </div>
                         <!-- Tombol filter -->
                         <div class="flex justify-end mt-4">
                             <button type="submit" class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
                                 Filter
                             </button>
-                            <?php if (!empty($filterMonth) || !empty($filterYear)): ?>
+                            <?php if (!empty($filterMonth) || !empty($filterYear) || !empty($filterCategory) || !empty($searchTitle)): ?>
                             <a href="admin_dashboard.php" class="ml-4 px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400">
                                 Hapus Filter
                             </a>
@@ -150,19 +166,19 @@ $searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
                             <tbody>
                                 <?php foreach ($newspapers as $newspaper): ?>
                                 <tr>
-                                    <td class="py-2 px-4 border-b border-gray-300">
+                                    <td class="py-2 px-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                         <?php echo htmlspecialchars($newspaper['title']); ?>
                                     </td>
-                                    <td class="py-2 px-4 border-b border-gray-300">
+                                    <td class="py-2 px-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                         <?php echo htmlspecialchars($newspaper['category_name']); ?>
                                     </td>
-                                    <td class="py-2 px-4 border-b border-gray-300">
+                                    <td class="py-2 px-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                         <?php echo htmlspecialchars($newspaper['category']); ?>
                                     </td>
-                                    <td class="py-2 px-4 border-b border-gray-300">
+                                    <td class="py-2 px-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                         <?php echo htmlspecialchars($newspaper['publication_date']); ?>
                                     </td>
-                                    <td class="py-2 px-4 border-b border-gray-300">
+                                    <td class="py-2 px-4 border-b border-gray-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                         <a href="view_newspaper.php?id=<?php echo $newspaper['id']; ?>" class="text-blue-500 hover:text-blue-600">View</a>
                                         <a href="edit_newspaper.php?id=<?php echo $newspaper['id']; ?>" class="text-blue-500 hover:text-blue-600 ml-2">Edit</a>
                                         <a href="#" class="text-red-500 hover:text-red-600 ml-2" onclick="confirmDelete(<?php echo $newspaper['id']; ?>)">Delete</a>
@@ -176,7 +192,7 @@ $searchTitle = isset($_GET['title']) ? $_GET['search_title'] : '';
                     <!-- Pagination -->
                     <div class="flex justify-center mt-4">
                         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?page=<?php echo $i; ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>" class="px-3 py-2 mx-1 text-white bg-blue-500 rounded-lg hover:bg-blue-700 <?php echo ($i === $page) ? 'bg-blue-700' : ''; ?>">
+                        <a href="?page=<?php echo $i; ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>&filter_month=<?php echo $filterMonth; ?>&filter_year=<?php echo $filterYear; ?>&filter_category=<?php echo $filterCategory; ?>&search_title=<?php echo urlencode($searchTitle); ?>" class="px-3 py-2 mx-1 text-white bg-blue-500 rounded-lg hover:bg-blue-700 <?php echo ($i === $page) ? 'bg-blue-700' : ''; ?>">
                             <?php echo $i; ?>
                         </a>
                         <?php endfor; ?>

@@ -167,7 +167,7 @@ if (isset($_SESSION['role'])) {
 
     <!-- Main Content -->
     <main class="container mx-auto mt-5 px-4">
-        <div class="bg-white shadow-md rounded-lg p-6 flex grid lg:grid-cols-2 gap-2 md:grid-cols-1 mx-auto">
+        <div class="bg-white shadow-md rounded-lg p-6 gap-4 mx-auto">
             <div>
                 <h2 class="text-2xl font-semibold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
                 <div class="mb-4">
@@ -176,16 +176,16 @@ if (isset($_SESSION['role'])) {
                 </div>
                 <div class="mb-4">
                     <span class="text-gray-600">Tanggal Terbit:</span>
-                    <span
-                        class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['publication_date']); ?></span>
+                    <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['publication_date']); ?></span>
                 </div>
-                <div class="mb-4">
+                <div class="mb-4 break-words">
                     <span class="text-gray-600">Tema / Isi :</span>
-                    <span
-                        class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['category']); ?></span>
+                    <span class="text-blue-600 font-semibold break-words"><?php echo htmlspecialchars($newspaper['category']); ?></span>
                 </div>
             </div>
-            <div class="pdf-viewer bg-gray-400 p-4 rounded-lg" id="pdf-viewer"></div>
+        </div>
+        <div class="container mx-auto flex justify-center items-center p-4 bg-white mb-10">
+            <iframe src="../uploads/<?php echo $newspaper['pdf_file']; ?>" width="100%" height="600px" style="border: none;"></iframe>
         </div>
     </main>
 
@@ -216,6 +216,9 @@ if (isset($_SESSION['role'])) {
         }
     });
     </script>
+    <?php
+    require '../components/footer.php'
+    ?>
 </body>
 
 </html>

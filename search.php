@@ -181,7 +181,7 @@ if (isset($_SESSION['role'])) {
                                 <?php foreach ($newspapers as $newspaper) : ?>
                                 <tr>
                                     <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                        <div class="text-sm leading-5 text-gray-900">
+                                        <div class="text-sm leading-5 text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                             <?php echo htmlspecialchars($newspaper['title']); ?>
                                         </div>
                                     </td>
@@ -196,7 +196,7 @@ if (isset($_SESSION['role'])) {
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                        <div class="text-sm leading-5 text-gray-900">
+                                        <div class="text-sm leading-5 text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                             <?php echo htmlspecialchars($newspaper['category']); ?>
                                         </div>
                                     </td>
@@ -204,25 +204,24 @@ if (isset($_SESSION['role'])) {
                                         <a href="user/view_newspaper.php?id=<?php echo $newspaper['id']; ?>"
                                             class="text-blue-500 hover:text-blue-700">Lihat</a>
                                         <?php if ($role === 'admin'): ?>
-                                        <a href="admin/edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                                            class="text-green-500 hover:text-green-700 ml-2">Edit</a><a
-                                            href="delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
-                                            class="text-red-500 hover:text-red-700 ml-2" onclick="event.preventDefault(); 
-             Swal.fire({
-                 title: 'Apakah Anda yakin menghapus data ini?',
-                 text: 'Anda tidak dapat mengembalikan koran ini setelah dihapus!',
-                 icon: 'warning',
-                 showCancelButton: true,
-                 confirmButtonColor: '#3085d6',
-                 cancelButtonColor: '#d33',
-                 confirmButtonText: 'Ya, hapus saja!',
-                 cancelButtonText: 'Batal'
-             }).then((result) => {
-                 if (result.isConfirmed) {
-                     window.location.href = 'user/delete_newspaper.php?id=<?php echo $newspaper['id']; ?>';
-                 }
-             });">Hapus</a>
-
+                                            <a href="admin/edit_newspaper.php?id=<?php echo $newspaper['id']; ?>"
+                                                class="text-green-500 hover:text-green-700 ml-2">Edit</a><a
+                                                href="delete_newspaper.php?id=<?php echo $newspaper['id']; ?>"
+                                                class="text-red-500 hover:text-red-700 ml-2" onclick="event.preventDefault(); 
+                                                Swal.fire({
+                                                    title: 'Apakah Anda yakin menghapus data ini?',
+                                                    text: 'Anda tidak dapat mengembalikan koran ini setelah dihapus!',
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#3085d6',
+                                                    cancelButtonColor: '#d33',
+                                                    confirmButtonText: 'Ya, hapus saja!',
+                                                    cancelButtonText: 'Batal'
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        window.location.href = 'user/delete_newspaper.php?id=<?php echo $newspaper['id']; ?>';
+                                                    }
+                                                });">Hapus</a>
                                         <?php endif; ?>
                                     </td>
                                 </tr>

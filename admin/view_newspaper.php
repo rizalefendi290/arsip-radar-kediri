@@ -169,38 +169,8 @@ $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
         </div>
     </header>
     <!-- Main Content -->
-    <main class="container mx-auto py-4 px-4">
-        <div class="container mx-auto items-center flex justify-between">
-            <a href="admin_dashboard.php"
-                class="flex bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded inline-block">
-                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                    width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M5 12h14M5 12l4-4m-4 4 4 4" />
-                </svg>
-                Kembali
-            </a>
-
-            <form class="flex-grow max-w-md mx-auto mt-4 md:mt-0" action="../search.php" method="GET">
-                <label for="default-search"
-                    class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                        </svg>
-                    </div>
-                    <input type="search" id="default-search" name="query"
-                        class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        placeholder="Telusuri, Koran..." required />
-                    <button type="submit"
-                        class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
-                </div>
-            </form>
-        </div>
-        <div class="bg-white shadow-md rounded-lg p-6 flex grid lg:grid-cols-2 gap-2 md:grid-cols-1 mx-auto">
+    <main class="container mx-auto mt-5 px-4">
+        <div class="bg-white shadow-md rounded-lg p-6 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4 mx-auto">
             <div>
                 <h2 class="text-2xl font-semibold mb-4"><?php echo htmlspecialchars($newspaper['title']); ?></h2>
                 <div class="mb-4">
@@ -209,16 +179,16 @@ $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
                 </div>
                 <div class="mb-4">
                     <span class="text-gray-600">Tanggal Terbit:</span>
-                    <span
-                        class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['publication_date']); ?></span>
+                    <span class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['publication_date']); ?></span>
                 </div>
-                <div class="mb-4">
+                <div class="mb-4 break-words">
                     <span class="text-gray-600">Tema / Isi :</span>
-                    <span
-                        class="text-blue-600 font-semibold"><?php echo htmlspecialchars($newspaper['category']); ?></span>
+                    <span class="text-blue-600 font-semibold break-words"><?php echo htmlspecialchars($newspaper['category']); ?></span>
                 </div>
             </div>
-            <div class="pdf-viewer bg-gray-400 p-4 rounded-lg" id="pdf-viewer"></div>
+        </div>
+        <div class="container mx-auto flex justify-center items-center p-4 bg-white mb-10">
+            <iframe src="../uploads/<?php echo $newspaper['pdf_file']; ?>" width="100%" height="600px" style="border: none;"></iframe>
         </div>
     </main>
     <!-- Footer (opsional) -->
