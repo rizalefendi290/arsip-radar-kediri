@@ -39,9 +39,9 @@ if (!empty($filterCategory)) {
     $params[':filterCategory'] = $filterCategory;
 }
 
-if (!empty($searchTerm)) {
-    $filterConditions[] = '(title LIKE :searchTerm OR category_name LIKE :searchTerm OR content LIKE :searchTerm)';
-    $params[':searchTerm'] = '%' . $searchTerm . '%';
+if (!empty($searchTitle)) {
+    $filterConditions[] = 'newspapers.title LIKE :searchTitle OR categories.name LIKE :searchTitle';
+    $params[':searchTitle'] = '%' . $searchTitle . '%';
 }
 
 // Pagination
@@ -51,7 +51,7 @@ $offset = ($page - 1) * $limit; // Offset data
 
 // Query dasar untuk mengambil data koran dari database dengan pengurutan dan filter (jika ada)
 $sql = 'SELECT newspapers.*, categories.name AS category_name FROM newspapers LEFT JOIN categories ON newspapers.category_id = categories.id';
-$countSql = 'SELECT COUNT(*) AS total FROM newspapers';
+$countSql = 'SELECT COUNT(*) AS total FROM newspapers LEFT JOIN categories ON newspapers.category_id = categories.id';
 
 // Menambahkan filter ke query jika dipilih
 if (!empty($filterConditions)) {
@@ -111,10 +111,7 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
                     <form class="max-w-md mx-auto mb-5" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- search -->
-                            <div class="col-span-2">
-                                <label for="search_title" class="block text-sm font-medium text-gray-700">Cari Judul Koran:</label>
-                                <input type="text" id="search_title" name="search_title" value="<?php echo htmlspecialchars($searchTitle); ?>" class="block w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            </div>
+
                             <!-- Input untuk bulan -->
                             <div>
                                 <label for="filter_month" class="block text-sm font-medium text-gray-700">Bulan:</label>
